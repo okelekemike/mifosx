@@ -15,13 +15,18 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.hooks.event.HookEvent;
+import org.mifosplatform.infrastructure.hooks.event.HookEventSource;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.DepositAccountUtils;
 import org.mifosplatform.portfolio.savings.data.DepositAccountData;
@@ -30,9 +35,11 @@ import org.mifosplatform.portfolio.savings.service.DepositAccountReadPlatformSer
 import org.mifosplatform.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountWritePlatformService;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,18 +56,28 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+    private final ApplicationContext applicationContext;
+    private  PlatformSecurityContext context;
+    private final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer;
+
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService,
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
-            final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+            final DepositAccountWritePlatformService depositAccountWritePlatformService,
+            final ApplicationContext applicationContext,
+            PlatformSecurityContext context,
+            final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
         this.depositAccountReadPlatformService = depositAccountReadPlatformService;
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+        this.applicationContext = applicationContext;
+        this.context=context;
+        this.toApiResultJsonSerializer=toApiResultJsonSerializer;
     }
 
     @Transactional
@@ -350,5 +367,25 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         }
 
     }
+
+	@Override
+	@CronTarget(jobName = JobName.LOAN_REPAYMENT_SMS_REMINDER_TO_CLIENT)
+	public void LoanRepaymentSmsReminder() {
+		// TODO Auto-generated method stub
+                 
+		        final String authToken = ThreadLocalContextUtil.getAuthToken();
+		        final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+		        final AppUser appUser = this.context.authenticatedUser();
+
+		        final HookEventSource hookEventSource = new HookEventSource("LoanRepaymentSmsReminder", "Remindclient");
+
+		        final String serializedResult = this.toApiResultJsonSerializer.serialize("{reportName=Loan Repayment Reminders}");
+
+		        final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, tenantIdentifier, appUser, authToken);
+
+		        applicationContext.publishEvent(applicationEvent);
+		    }
+		
+	
 
 }
