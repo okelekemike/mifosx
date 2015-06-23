@@ -1785,6 +1785,12 @@ public class CommandWrapperBuilder {
         this.href = "/updateJobDetail/" + jobId + "/updateJobDetail";
         return this;
     }
+    public CommandWrapperBuilder exceuteJob(final Long jobId) {
+        this.actionName = "Excecuate";
+        this.entityName = "SCHEDULER";
+        this.entityId = jobId;        
+        return this;
+    }
 
     public CommandWrapperBuilder createMeeting(final CommandWrapper resourceDetails, final String supportedEntityType,
             final Long supportedEntityId) {

@@ -21,12 +21,15 @@ import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.hooks.data.HookData;
 import org.mifosplatform.infrastructure.hooks.event.HookEvent;
 import org.mifosplatform.infrastructure.hooks.event.HookEventSource;
+import org.mifosplatform.infrastructure.hooks.service.HookReadPlatformServiceImpl;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.loanaccount.service.LoanRepaymentRemainderShedulerJob;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.DepositAccountUtils;
 import org.mifosplatform.portfolio.savings.data.DepositAccountData;
@@ -56,10 +59,14 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
-    private final ApplicationContext applicationContext;
-    private  PlatformSecurityContext context;
-    private final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer;
-
+    @SuppressWarnings("unused")
+	private final ApplicationContext applicationContext;
+    @SuppressWarnings("unused")
+	private final PlatformSecurityContext context;
+    @SuppressWarnings("unused")
+	private final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer;
+    private final LoanRepaymentRemainderShedulerJob loanRepaymentRemainderShedulerJob;
+    private final HookReadPlatformServiceImpl hookReadPlatformServiceImpl;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
@@ -68,8 +75,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final DepositAccountWritePlatformService depositAccountWritePlatformService,
             final ApplicationContext applicationContext,
-            PlatformSecurityContext context,
-            final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer) {
+            final PlatformSecurityContext context,
+            final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer,final LoanRepaymentRemainderShedulerJob loanRepaymentRemainderShedulerJob,final HookReadPlatformServiceImpl hookReadPlatformServiceImpl) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -78,6 +85,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.applicationContext = applicationContext;
         this.context=context;
         this.toApiResultJsonSerializer=toApiResultJsonSerializer;
+        this.loanRepaymentRemainderShedulerJob=loanRepaymentRemainderShedulerJob;
+        this.hookReadPlatformServiceImpl=hookReadPlatformServiceImpl;
     }
 
     @Transactional
@@ -371,17 +380,16 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 	@Override
 	@CronTarget(jobName = JobName.LOAN_REPAYMENT_SMS_REMINDER_TO_CLIENT)
 	public void LoanRepaymentSmsReminder() {
+		//loanRepaymentRemainderShedulerJob.LoanRepaymentSmsReminder();
 		// TODO Auto-generated method stub
-                 
 		        final String authToken = ThreadLocalContextUtil.getAuthToken();
 		        final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-		        final AppUser appUser = this.context.authenticatedUser();
+		      // final AppUser appUser = this.context.authenticatedUser();
 
 		        final HookEventSource hookEventSource = new HookEventSource("LoanRepaymentSmsReminder", "Remindclient");
+		        final String serializedResult = this.toApiResultJsonSerializer.serialize("{reportName:Loan Repayment Reminders}");
 
-		        final String serializedResult = this.toApiResultJsonSerializer.serialize("{reportName=Loan Repayment Reminders}");
-
-		        final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, tenantIdentifier, appUser, authToken);
+		        final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, tenantIdentifier );
 
 		        applicationContext.publishEvent(applicationEvent);
 		    }

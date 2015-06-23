@@ -104,7 +104,7 @@ public class SchedulerJobApiResource {
     @POST
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     public Response executeJob(@PathParam(SchedulerJobApiConstants.JOB_ID) final Long jobId,
-            @QueryParam(SchedulerJobApiConstants.COMMAND) final String commandParam) {
+            @QueryParam(SchedulerJobApiConstants.COMMAND) final String commandParam) {    	
         // check the logged in user have permissions to execute scheduler jobs
         final boolean hasNotPermission = this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "EXECUTEJOB_SCHEDULER");
         if (hasNotPermission) {

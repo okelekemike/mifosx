@@ -25,7 +25,7 @@ public enum JobName {
     ADD_PERIODIC_ACCRUAL_ENTRIES("Add Periodic Accrual Transactions"),
     RECALCULATE_INTEREST_FOR_LOAN("Recalculate Interest For Loans"),
     GENERATE_RD_SCEHDULE("Generate Mandatory Savings Schedule"),
-    LOAN_REPAYMENT_SMS_REMINDER_TO_CLIENT("Loan Repayment Sms Reminder");//
+    LOAN_REPAYMENT_SMS_REMINDER_TO_CLIENT("Loan Repayment Sms Reminder");
 
     private final String name;
 
