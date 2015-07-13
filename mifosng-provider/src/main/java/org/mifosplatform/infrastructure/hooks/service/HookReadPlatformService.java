@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.hooks.data.HookData;
 import org.mifosplatform.infrastructure.hooks.domain.Hook;
+import org.mifosplatform.infrastructure.hooks.domain.HookConfiguration;
 
 public interface HookReadPlatformService {
 
@@ -20,4 +21,8 @@ public interface HookReadPlatformService {
     List<Hook> retrieveHooksByEvent(final String actionName, final String entityName);
 
     HookData retrieveNewHookDetails(String templateName);
+
+    List<HookConfiguration> retriveHookConfigByEvent(final String actionName, final String entityName);
+    
+    
 }

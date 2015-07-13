@@ -27,17 +27,18 @@ public class CommandWrapperBuilder {
     private String transactionId;
     private Long productId;
     private Long templateId;
+    
+    
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
                 this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
     }
-
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
         this.loanId = withLoanId;
         return this;
     }
-
+    
     public CommandWrapperBuilder withSavingsId(final Long withSavingsId) {
         this.savingsId = withSavingsId;
         return this;
@@ -1783,12 +1784,6 @@ public class CommandWrapperBuilder {
         this.entityName = "SCHEDULER";
         this.entityId = jobId;
         this.href = "/updateJobDetail/" + jobId + "/updateJobDetail";
-        return this;
-    }
-    public CommandWrapperBuilder exceuteJob(final Long jobId) {
-        this.actionName = "Excecuate";
-        this.entityName = "SCHEDULER";
-        this.entityId = jobId;        
         return this;
     }
 

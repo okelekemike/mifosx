@@ -10,6 +10,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.hooks.data.*;
 import org.mifosplatform.infrastructure.hooks.domain.Hook;
+import org.mifosplatform.infrastructure.hooks.domain.HookConfiguration;
 import org.mifosplatform.infrastructure.hooks.domain.HookRepository;
 import org.mifosplatform.infrastructure.hooks.exception.HookNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -253,5 +254,24 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
                     .fromSchema(fieldType, fieldName, optional, placeholder);
         }
     }
+
+	@Override
+	public List<HookConfiguration> retriveHookConfigByEvent(String actionName,
+			String entityName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+//	@Override
+//	public List<HookConfiguration> retriveHookConfigByEvent(final String actionName, final String entityName) {
+//		
+//		List<HookConfiguration> abc = null;
+//		
+//	  String sql = " select mhc.field_name as fieldname,  mhc.field_value as fieldvalue from  m_hook_configuration mhc "
+//	               + " where mhc.hook_id = ( select mhre.hook_id  from m_hook_registered_events mhre where mhre.entity_name='SCHEDULER' "
+//	                + " and mhre.action_name='EXECUTEJOB') " ;
+//	  
+//	  return 1;
 
 }

@@ -40,6 +40,8 @@ import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.util.json.JSONObject;
+
 @Path("/jobs")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
@@ -113,8 +115,11 @@ public class SchedulerJobApiResource {
         }
         Response response = Response.status(400).build();
         if (is(commandParam, SchedulerJobApiConstants.COMMAND_EXECUTE_JOB)) {
+        	        	
             this.jobRegisterService.executeJob(jobId);
             response = Response.status(202).build();
+            
+           
         } else {
             throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);
         }

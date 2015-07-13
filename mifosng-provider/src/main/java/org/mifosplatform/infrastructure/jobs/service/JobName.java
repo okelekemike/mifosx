@@ -25,8 +25,11 @@ public enum JobName {
     ADD_PERIODIC_ACCRUAL_ENTRIES("Add Periodic Accrual Transactions"),
     RECALCULATE_INTEREST_FOR_LOAN("Recalculate Interest For Loans"),
     GENERATE_RD_SCEHDULE("Generate Mandatory Savings Schedule"),
-    LOAN_REPAYMENT_SMS_REMINDER_TO_CLIENT("Loan Repayment Sms Reminder");
-
+    LOAN_REPAYMENT_SMS_REMINDER_TO_CLIENT("Loan Repayment Sms Reminder"),
+    LOAN_FIRST_OVERDUE_REPAYMENT_REMINDER_SMS("Loan First Overdue Repayment Reminder"),
+    LOAN_SECOND_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Second Overdue Repayment Reminder"), 
+    LOAN_THIRD_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Third Overdue Repayment Reminder"),
+    LOAN_FOURTH_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Fourth Overdue Repayment Reminder");
     private final String name;
 
     private JobName(final String name) {
