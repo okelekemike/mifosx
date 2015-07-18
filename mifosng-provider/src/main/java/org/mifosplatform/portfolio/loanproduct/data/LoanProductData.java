@@ -874,7 +874,33 @@ public class LoanProductData {
         if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyInterval(); }
         return null;
     }
+    public String getStatus() {
+        return this.status;
+    }
 
+    public Integer getMinNumberOfRepayments() {
+        return this.minNumberOfRepayments;
+    }
+
+    public Integer getMaxNumberOfRepayments() {
+        return this.maxNumberOfRepayments;
+    }
+
+    public BigDecimal getMinInterestRatePerPeriod() {
+        return this.minInterestRatePerPeriod;
+    }
+
+    public BigDecimal getMaxInterestRatePerPeriod() {
+        return this.maxInterestRatePerPeriod;
+    }
+
+    public LocalDate getStartDate() {
+        return this.startDate;
+    }
+
+    public LocalDate getCloseDate() {
+        return this.closeDate;
+    }
     public boolean canDefineInstallmentAmount() {
         return this.canDefineInstallmentAmount;
     }

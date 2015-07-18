@@ -98,7 +98,13 @@ public class ClientsApiResource {
             clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_REJECT_REASON);
         } else if (is(commandParam, "withdraw")) {
             clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_WITHDRAW_REASON);
-        } else {
+        }else if (is(commandParam, "savingDepoistType")) {
+            clientData = this.clientReadPlatformService.retrieveTemplateByDepositType(officeId, staffInSelectedOfficeOnly, 100);
+        }else if (is(commandParam, "fixedDepoistType")) {
+            clientData = this.clientReadPlatformService.retrieveTemplateByDepositType(officeId, staffInSelectedOfficeOnly, 200);
+        }else if (is(commandParam, "recurringDepoistType")) {
+            clientData = this.clientReadPlatformService.retrieveTemplateByDepositType(officeId, staffInSelectedOfficeOnly, 300);
+        }else {
             clientData = this.clientReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
         }
 

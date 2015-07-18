@@ -191,6 +191,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.deposit_type_enum as depositType, ");
             sqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
             sqlBuilder.append("g.id as groupId, g.display_name as groupName, ");
+            sqlBuilder.append("ct.id as centerId, ct.display_name as centerName, ");
             sqlBuilder.append("sp.id as productId, sp.name as productName, ");
             sqlBuilder.append("s.id fieldOfficerId, s.display_name as fieldOfficerName, ");
             sqlBuilder.append("sa.status_enum as statusEnum, ");
@@ -232,6 +233,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.min_required_opening_balance as minRequiredOpeningBalance, ");
             sqlBuilder.append("sa.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sa.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
+            sqlBuilder.append("ifnull(dard.mandatory_recommended_deposit_amount, 0) as mandatoryRecommendedDepositAmount, ");
             // sqlBuilder.append("sa.withdrawal_fee_amount as withdrawalFeeAmount,");
             // sqlBuilder.append("sa.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
             sqlBuilder.append("sa.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
@@ -258,7 +260,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
             sqlBuilder.append("left join m_client c ON c.id = sa.client_id ");
-            sqlBuilder.append("left join m_group g ON g.id = sa.group_id ");
+            sqlBuilder.append("left join m_group g ON g.id = sa.group_id and g.level_id = 2 ");
+            sqlBuilder.append("left join m_group ct ON ct.id = sa.group_id and ct.level_id = 1 ");
             sqlBuilder.append("left join m_staff s ON s.id = sa.field_officer_id ");
             sqlBuilder.append("left join m_appuser sbu on sbu.id = sa.submittedon_userid ");
             sqlBuilder.append("left join m_appuser rbu on rbu.id = sa.rejectedon_userid ");
@@ -266,6 +269,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("left join m_appuser abu on abu.id = sa.approvedon_userid ");
             sqlBuilder.append("left join m_appuser avbu on avbu.id = sa.activatedon_userid ");
             sqlBuilder.append("left join m_appuser cbu on cbu.id = sa.closedon_userid ");
+            sqlBuilder.append("left join m_deposit_account_recurring_detail dard on dard.savings_account_id = sa.id ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -285,6 +289,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
+            final Long centerId = JdbcSupport.getLong(rs, "centerId");
+            final String centerName = rs.getString("centerName");
             final Long clientId = JdbcSupport.getLong(rs, "clientId");
             final String clientName = rs.getString("clientName");
 
@@ -326,6 +332,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String closedByUsername = rs.getString("closedByUsername");
             final String closedByFirstname = rs.getString("closedByFirstname");
             final String closedByLastname = rs.getString("closedByLastname");
+            
+            final BigDecimal mandatoryRecommendedDepositAmount = rs.getBigDecimal("mandatoryRecommendedDepositAmount");
 
             final SavingsAccountApplicationTimelineData timeline = new SavingsAccountApplicationTimelineData(submittedOnDate,
                     submittedByUsername, submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername,
@@ -421,12 +429,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
                     totalPenaltyCharge);
 
-            return SavingsAccountData.instance(id, accountNo, depositType, externalId, groupId, groupName, clientId, clientName, productId,
+            return SavingsAccountData.instance(id, accountNo, depositType, externalId, groupId, groupName, centerId, centerName, clientId, clientName, productId,
                     productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
                     allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation,
-                    onHoldFunds);
+                    onHoldFunds, mandatoryRecommendedDepositAmount);
         }
     }
 
@@ -563,8 +571,15 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             if (group != null) {
                 groupName = group.getName();
             }
+            
+            Long centerId = null;
+            String centerName = null;
+            if (group != null && !group.isChildGroup()) {
+                centerId = group.getId();
+                centerName = group.getName();
+            }
 
-            template = SavingsAccountData.withClientTemplate(clientId, clientName, groupId, groupName);
+            template = SavingsAccountData.withClientTemplate(clientId, clientName, groupId, groupName, centerId, centerName);
 
             final Collection<StaffData> fieldOfficerOptions = null;
             final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
@@ -917,10 +932,17 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             }
 
             Long groupId = null;
+            Long centerId = null;
             String groupName = null;
-            if (this.group != null) {
+            String centerName = null;
+            
+            if (this.group != null && this.group.isChildGroup()) {
                 groupId = this.group.getId();
                 groupName = this.group.getName();
+            }
+            if (this.group != null && !this.group.isChildGroup()) {
+                centerId = this.group.getId();
+                centerName = this.group.getName();
             }
 
             final Long fieldOfficerId = null;
@@ -929,15 +951,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             // final LocalDate annualFeeNextDueDate = null;
             final SavingsAccountSummaryData summary = null;
             final BigDecimal onHoldFunds = null;
+            final BigDecimal mandatoryRecommendedDepositAmount = null;
 
             final SavingsAccountApplicationTimelineData timeline = SavingsAccountApplicationTimelineData.templateDefault();
             final EnumOptionData depositType = null;
-            return SavingsAccountData.instance(null, null, depositType, null, groupId, groupName, clientId, clientName, productId,
+            return SavingsAccountData.instance(null, null, depositType, null, groupId, groupName, centerId, centerName, clientId, clientName, productId,
                     productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
                     allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation,
-                    onHoldFunds);
+                    onHoldFunds, mandatoryRecommendedDepositAmount);
         }
     }
 

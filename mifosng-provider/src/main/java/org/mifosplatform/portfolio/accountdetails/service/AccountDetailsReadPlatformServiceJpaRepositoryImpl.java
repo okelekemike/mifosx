@@ -147,6 +147,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             accountsSummary.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             accountsSummary.append("curr.display_symbol as currencyDisplaySymbol, ");
             accountsSummary.append("sa.product_id as productId, p.name as productName, p.short_name as shortProductName, ");
+            accountsSummary.append("ifnull(dard.mandatory_recommended_deposit_amount, 0) as mandatoryRecommendedDepositAmount, ");
             accountsSummary.append("sa.deposit_type_enum as depositType ");
             accountsSummary.append("from m_savings_account sa ");
             accountsSummary.append("join m_savings_product as p on p.id = sa.product_id ");
@@ -156,7 +157,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             accountsSummary.append("left join m_appuser wbu on wbu.id = sa.withdrawnon_userid ");
             accountsSummary.append("left join m_appuser abu on abu.id = sa.approvedon_userid ");
             accountsSummary.append("left join m_appuser avbu on rbu.id = sa.activatedon_userid ");
-            accountsSummary.append("left join m_appuser cbu on cbu.id = sa.closedon_userid ");
+            accountsSummary.append("left join m_appuser cbu on cbu.id = sa.closedon_userid ");            
+            accountsSummary.append("left join m_deposit_account_recurring_detail dard on dard.savings_account_id = sa.id ");
 
             this.schemaSql = accountsSummary.toString();
         }
@@ -220,6 +222,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final String closedByUsername = rs.getString("closedByUsername");
             final String closedByFirstname = rs.getString("closedByFirstname");
             final String closedByLastname = rs.getString("closedByLastname");
+            
+            final BigDecimal mandatoryRecommendedDepositAmount = rs.getBigDecimal("mandatoryRecommendedDepositAmount");
 
             final SavingsAccountApplicationTimelineData timeline = new SavingsAccountApplicationTimelineData(submittedOnDate,
                     submittedByUsername, submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername,
@@ -229,7 +233,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     closedByLastname);
 
             return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, shortProductName, status, currency, accountBalance,
-                    accountTypeData, timeline, depositTypeData);
+                    accountTypeData, timeline, depositTypeData, mandatoryRecommendedDepositAmount);
         }
     }
 

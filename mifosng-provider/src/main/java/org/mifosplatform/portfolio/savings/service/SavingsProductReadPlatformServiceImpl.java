@@ -98,7 +98,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         public SavingProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("sp.id as id, sp.name as name, sp.short_name as shortName, sp.description as description, ");
+            sqlBuilder.append("sp.id as id, sp.name as name, sp.deposit_type_enum as depositType, sp.short_name as shortName, sp.description as description, ");
             sqlBuilder
                     .append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, sp.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
@@ -133,6 +133,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
+            final Integer depositType = rs.getInt("depositType");
             final String shortName = rs.getString("shortName");
             final String description = rs.getString("description");
 
@@ -183,7 +184,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
             final BigDecimal minBalanceForInterestCalculation = rs.getBigDecimal("minBalanceForInterestCalculation");
 
-            return SavingsProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
+            return SavingsProductData.instance(id, name, depositType, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
                     accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
@@ -194,7 +195,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     private static final class SavingProductLookupMapper implements RowMapper<SavingsProductData> {
 
         public String schema() {
-            return " sp.id as id, sp.name as name from m_savings_product sp";
+            return " sp.id as id, sp.name as name, sp.deposit_type_enum as depositType from m_savings_product sp";
         }
 
         @Override
@@ -202,22 +203,23 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
+            final Integer depositType = rs.getInt("depositType");
 
-            return SavingsProductData.lookup(id, name);
+            return SavingsProductData.lookup(id, name, depositType);
         }
     }
 
     @Override
     public Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType) {
         String sql = "select " + this.savingsProductLookupsRowMapper.schema();
-
+        
         boolean inClauseAdded = false;
         
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
   		String inClause = mifosEntityAccessUtil.
   				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
 						MifosEntityType.SAVINGS_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
+        if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
     		sql += " where id in ( " + inClause + " ) ";
     		inClauseAdded = true;
     	}
@@ -235,6 +237,19 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
     }
 
+    @Override
+    public Collection<SavingsProductData> retrieveAllForByType(Integer depositType) {
+        String sql = "select " + this.savingsProductLookupsRowMapper.schema();
+        
+        
+        if (depositType != null) {
+            sql += " where sp.deposit_type_enum=" + depositType.toString().trim() + " ";
+        }
+
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper);
+
+    }
+    
     @Override
     public Collection<SavingsProductData> retrieveAllForCurrency(String currencyCode) {
 

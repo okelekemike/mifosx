@@ -21,27 +21,38 @@ public class SavingsDueData {
     private final String accountId;
     @SuppressWarnings("unused")
     private final Integer accountStatusId;
+    private final Integer accountTypeId;
+    private final Integer productDepositType;
     private final String productName;
     private final Long productId;
     @SuppressWarnings("unused")
     private final CurrencyData currency;
     @SuppressWarnings("unused")
     private BigDecimal dueAmount = BigDecimal.ZERO;
+    @SuppressWarnings("unused")
+    private BigDecimal withdrawalAmount = BigDecimal.ZERO;
 
-    public static SavingsDueData instance(final Long savingsId, final String accountId, final Integer accountStatusId,
-            final String productName, final Long productId, final CurrencyData currency, final BigDecimal dueAmount) {
-        return new SavingsDueData(savingsId, accountId, accountStatusId, productName, productId, currency, dueAmount);
+    public static SavingsDueData instance(final Long savingsId, final String accountId, final Integer accountStatusId, final Integer accountTypeId, final Integer productDepositType,
+            final String productName, final Long productId, final CurrencyData currency, final BigDecimal dueAmount, final BigDecimal withdrawalAmount) {
+        return new SavingsDueData(savingsId, accountId, accountStatusId, accountTypeId, productDepositType, productName, productId, currency, dueAmount, withdrawalAmount);
     }
 
-    private SavingsDueData(final Long savingsId, final String accountId, final Integer accountStatusId, final String productName,
-            final Long productId, final CurrencyData currency, final BigDecimal dueAmount) {
+    private SavingsDueData(final Long savingsId, final String accountId, final Integer accountStatusId, final Integer accountTypeId, final Integer productDepositType, final String productName,
+            final Long productId, final CurrencyData currency, final BigDecimal dueAmount, final BigDecimal withdrawalAmount) {
         this.savingsId = savingsId;
         this.accountId = accountId;
         this.accountStatusId = accountStatusId;
+        this.accountTypeId = accountTypeId;
+        this.productDepositType = productDepositType;
         this.productName = productName;
         this.productId = productId;
         this.currency = currency;
         this.dueAmount = dueAmount;
+        this.withdrawalAmount = withdrawalAmount;
+    }
+    
+    public Integer productDepositType() {
+        return this.productDepositType;
     }
     
     public String productName() {

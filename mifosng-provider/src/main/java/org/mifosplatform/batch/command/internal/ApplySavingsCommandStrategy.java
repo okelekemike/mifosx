@@ -20,9 +20,9 @@ import org.springframework.stereotype.Component;
  * Implements {@link org.mifosplatform.batch.command.CommandStrategy} and
  * applies a new savings on an existing client. It passes the contents of the
  * body from the BatchRequest to
- * {@link org.mifosplatform.portfolio.client.api.SavingsAccountsApiResource} and
+ * {@link org.mifosplatform.portfolio.savings.api.SavingsAccountsApiResource} and
  * gets back the response. This class will also catch any errors raised by
- * {@link org.mifosplatform.portfolio.client.api.SavingsAccountsApiResource} and
+ * {@link org.mifosplatform.portfolio.savings.api.SavingsAccountsApiResource} and
  * map those errors to appropriate status codes in BatchResponse.
  * 
  * @author Rishabh Shukla

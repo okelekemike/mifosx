@@ -74,5 +74,4 @@ public class SearchData {
 	public EnumOptionData getEntityStatus() {
         return this.entityStatus;
     }
-
 }

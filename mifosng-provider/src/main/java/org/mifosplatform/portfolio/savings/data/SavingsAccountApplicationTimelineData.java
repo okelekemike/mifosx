@@ -106,4 +106,8 @@ public class SavingsAccountApplicationTimelineData {
         this.closedByFirstname = closedByFirstname;
         this.closedByLastname = closedByLastname;
     }
+
+    public LocalDate getActivatedOnDate() {
+        return this.activatedOnDate;
+    }
 }

@@ -15,6 +15,8 @@ public interface ClientReadPlatformService {
 
     ClientData retrieveTemplate(Long officeId, boolean staffInSelectedOfficeOnly);
 
+    ClientData retrieveTemplateByDepositType(Long officeId, boolean staffInSelectedOfficeOnly, Integer depositType);
+
     Page<ClientData> retrieveAll(SearchParameters searchParameters);
 
     ClientData retrieveOne(Long clientId);

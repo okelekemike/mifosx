@@ -22,6 +22,7 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -54,6 +55,10 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "savings_account_id", nullable = true)
     private SavingsAccount savingsAccount;
 
+    @ManyToOne
+    @JoinColumn(name = "savings_account_transaction_id", nullable = true)
+    private SavingsAccountTransaction savingsAccountTransaction;
+
     public static Note clientNoteFromJson(final Client client, final JsonCommand command) {
         final String note = command.stringValueOfParameterNamed("note");
         return new Note(client, note);
@@ -74,6 +79,10 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 
     public static Note savingNote(final SavingsAccount account, final String note) {
         return new Note(account, note);
+    }
+
+    public static Note savingTransactionNote(final SavingsAccount account, final SavingsAccountTransaction savingsAccountTransaction, final String note) {
+        return new Note(account, savingsAccountTransaction, note);
     }
 
     public Note(final Client client, final String note) {
@@ -109,6 +118,8 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.group = null;
         this.loan = null;
         this.loanTransaction = null;
+        this.savingsAccount = null;
+        this.savingsAccountTransaction = null;
         this.note = null;
         this.noteTypeId = null;
     }
@@ -118,6 +129,14 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.client = account.getClient();
         this.note = note;
         this.noteTypeId = NoteType.SAVING_ACCOUNT.getValue();
+    }
+
+    private Note(final SavingsAccount account, final SavingsAccountTransaction savingsAccountTransaction, final String note) {
+        this.savingsAccount = account;
+        this.savingsAccountTransaction = savingsAccountTransaction;
+        this.client = account.getClient();
+        this.note = note;
+        this.noteTypeId = NoteType.SAVING_TRANSACTION.getValue();
     }
 
     public Map<String, Object> update(final JsonCommand command) {

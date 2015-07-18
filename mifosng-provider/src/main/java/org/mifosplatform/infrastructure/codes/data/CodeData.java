@@ -31,4 +31,12 @@ public class CodeData implements Serializable {
     public Long getCodeId() {
         return this.id;
     }
+
+    public String getName(){
+        return this.name;
+    }
+
+    public Boolean isSystemDefined(){
+        return this.systemDefined;
+    }
 }

@@ -54,4 +54,8 @@ public class SavingsAccountStatusEnumData {
     public Long id() {
         return this.id;
     }
+    
+    public Boolean isActive() {
+        return this.active;
+    }
 }

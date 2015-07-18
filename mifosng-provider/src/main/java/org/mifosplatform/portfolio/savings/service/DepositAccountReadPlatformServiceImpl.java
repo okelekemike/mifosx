@@ -1396,7 +1396,6 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final PaymentDetailData paymentDetailData = null;
             final AccountTransferData transfer = null;
             final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "runningBalance");
-            ;
             return SavingsAccountTransactionData.create(savingsId, transactionType, paymentDetailData, savingsId, accountNo, duedate,
                     currency, dueamount, runningBalance, false, transfer);
         }

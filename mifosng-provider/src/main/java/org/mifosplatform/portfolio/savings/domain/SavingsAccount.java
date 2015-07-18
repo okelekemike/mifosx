@@ -97,6 +97,8 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.util.CollectionUtils;
 
 import com.google.gson.JsonArray;
+import javax.persistence.OneToOne;
+
 
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
@@ -275,6 +277,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true)
     private Set<SavingsOfficerAssignmentHistory> savingsOfficerHistory;
+    
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    protected DepositAccountRecurringDetail depositAccountRecurringDetail;
 
     @Transient
     protected boolean accountNumberRequiresAutoGeneration = false;
@@ -2464,5 +2469,25 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public BigDecimal getWithdrawableBalance() {
         return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount());
+    }
+    
+    public boolean isSavingsAccount() {
+    	return DepositAccountType.SAVINGS_DEPOSIT.getValue().equals(this.depositType);
+    }
+
+    public boolean isMandatoryDeposit() {
+    	if (this.isSavingsAccount())  {
+            return false;
+        } else {
+            return this.depositAccountRecurringDetail.isMandatoryDeposit();
+        }
+    }
+    
+    public boolean isRDAccount() {
+    	return DepositAccountType.RECURRING_DEPOSIT.getValue().equals(this.depositType);    
+    }
+
+    public boolean isFDAccount() {
+    	return DepositAccountType.FIXED_DEPOSIT.getValue().equals(this.depositType);    
     }
 }

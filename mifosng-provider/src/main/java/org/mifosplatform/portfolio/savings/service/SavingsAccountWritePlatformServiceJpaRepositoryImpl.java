@@ -1172,4 +1172,40 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         return user;
     }
 
+    @Transactional
+    @Override
+    public void deposit(final SavingsAccountTransactionDTO savingsAccountTransactionDTO, DateTimeFormatter fmt ) {
+    	
+    	boolean isAccountTransfer = false;
+        boolean isRegularTransaction = true;
+        PaymentDetail paymentDetail = null;
+        BigDecimal transactionAmount = savingsAccountTransactionDTO.getTransactionAmount();
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsAccountTransactionDTO.getSavingsAccountId());
+        LocalDate transactionDate = savingsAccountTransactionDTO.getTransactionDate();
+
+        
+        this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
+                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
+    	
+    }
+    
+    @Transactional
+    @Override
+    public void withdraw(final SavingsAccountTransactionDTO savingsAccountTransactionDTO, DateTimeFormatter fmt ) {
+    	
+    	boolean isAccountTransfer = false;
+        boolean isRegularTransaction = true;
+        boolean isInterestTransfer = true;
+        boolean isWithdrawBalance = false;
+        PaymentDetail paymentDetail = null;
+        BigDecimal transactionAmount = savingsAccountTransactionDTO.getTransactionAmount();
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsAccountTransactionDTO.getSavingsAccountId());
+        LocalDate transactionDate = savingsAccountTransactionDTO.getTransactionDate();
+        final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
+                isRegularTransaction, account.isWithdrawalFeeApplicableForTransfer(), isInterestTransfer, isWithdrawBalance);
+        
+        this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
+                transactionAmount, paymentDetail, transactionBooleanValues);
+    	
+    }
 }

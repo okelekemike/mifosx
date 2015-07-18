@@ -28,5 +28,7 @@ public interface NoteRepository extends JpaRepository<Note, Long>, JpaSpecificat
 
     List<Note> findBySavingsAccountId(Long savingAccountId);
 
-    // Note findBySavingsAccountIdAndId(Long savingAccountId, Long id);
+    Note findBySavingsAccountIdAndId(Long savingAccountId, Long id);
+    
+    Note findBySavingsAccountTransactionIdAndId(Long savingAccountTransactionId, Long id);
 }

@@ -26,6 +26,7 @@ public class SavingsProductData {
 
     private final Long id;
     private final String name;
+    private final Integer depositType;
     private final String shortName;
     private final String description;
     private final CurrencyData currency;
@@ -83,6 +84,7 @@ public class SavingsProductData {
         final Long id = null;
         final String name = null;
         final String shortName = null;
+        final Integer depositType = null;
         final String description = null;
         final BigDecimal nominalAnnualInterestRate = null;
         final BigDecimal minRequiredOpeningBalance = null;
@@ -100,7 +102,7 @@ public class SavingsProductData {
         final boolean enforceMinRequiredBalance = false;
         final BigDecimal minBalanceForInterestCalculation = null;
 
-        return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
+        return new SavingsProductData(id, name, depositType, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingRule, accountingMappings,
                 paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
@@ -112,7 +114,7 @@ public class SavingsProductData {
     }
 
     public static SavingsProductData withCharges(final SavingsProductData product, final Collection<ChargeData> charges) {
-        return new SavingsProductData(product.id, product.name, product.shortName, product.description, product.currency,
+        return new SavingsProductData(product.id, product.name, product.depositType, product.shortName, product.description, product.currency,
                 product.nominalAnnualInterestRate, product.interestCompoundingPeriodType, product.interestPostingPeriodType,
                 product.interestCalculationType, product.interestCalculationDaysInYearType, product.minRequiredOpeningBalance,
                 product.lockinPeriodFrequency, product.lockinPeriodFrequencyType, product.withdrawalFeeForTransfers,
@@ -139,7 +141,7 @@ public class SavingsProductData {
             final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
             final Collection<ChargeData> penaltyOptions) {
 
-        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
+        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.depositType, existingProduct.shortName, existingProduct.description,
                 existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
@@ -173,7 +175,7 @@ public class SavingsProductData {
         final Collection<ChargeData> chargeOptions = null;
         final Collection<ChargeData> penaltyOptions = null;
 
-        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
+        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.depositType, existingProduct.shortName, existingProduct.description,
                 existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
@@ -188,7 +190,7 @@ public class SavingsProductData {
                 existingProduct.minBalanceForInterestCalculation);
     }
 
-    public static SavingsProductData instance(final Long id, final String name, final String shortName, final String description,
+    public static SavingsProductData instance(final Long id, final String name, final Integer depositType, final String shortName, final String description,
             final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
@@ -215,7 +217,7 @@ public class SavingsProductData {
         final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings = null;
         final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = null;
 
-        return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
+        return new SavingsProductData(id, name, depositType, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingType, accountingMappings,
                 paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
@@ -226,7 +228,7 @@ public class SavingsProductData {
                 minBalanceForInterestCalculation);
     }
 
-    public static SavingsProductData lookup(final Long id, final String name) {
+    public static SavingsProductData lookup(final Long id, final String name, Integer depositType) {
 
         final String shortName = null;
         final CurrencyData currency = null;
@@ -265,7 +267,7 @@ public class SavingsProductData {
         final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings = null;
         final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = null;
 
-        return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
+        return new SavingsProductData(id, name, depositType, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingType, accountingMappings,
                 paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
@@ -276,7 +278,7 @@ public class SavingsProductData {
                 minBalanceForInterestCalculation);
     }
 
-    private SavingsProductData(final Long id, final String name, final String shortName, final String description,
+    private SavingsProductData(final Long id, final String name, final Integer depositType, final String shortName, final String description,
             final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
@@ -297,6 +299,7 @@ public class SavingsProductData {
             final BigDecimal minBalanceForInterestCalculation) {
         this.id = id;
         this.name = name;
+        this.depositType = depositType;
         this.shortName = shortName;
         this.description = description;
         this.currency = currency;
@@ -363,7 +366,47 @@ public class SavingsProductData {
         return this.id.hashCode();
     }
 
+    public Long getId() {
+        return this.id;
+    }
+
     public String getName() {
         return this.name;
+    }
+
+    public CurrencyData getCurrency() {
+        return this.currency;
+    }
+
+    public BigDecimal getNominalAnnualInterestRate() {
+        return this.nominalAnnualInterestRate;
+    }
+
+    public EnumOptionData getInterestCompoundingPeriodType() {
+        return this.interestCompoundingPeriodType;
+    }
+
+    public EnumOptionData getInterestPostingPeriodType() {
+        return this.interestPostingPeriodType;
+    }
+
+    public EnumOptionData getInterestCalculationType() {
+        return this.interestCalculationType;
+    }
+
+    public EnumOptionData getInterestCalculationDaysInYearType() {
+        return this.interestCalculationDaysInYearType;
+    }
+
+    public BigDecimal getMinRequiredOpeningBalance() {
+        return this.minRequiredOpeningBalance;
+    }
+
+    public Integer getLockinPeriodFrequency() {
+        return this.lockinPeriodFrequency;
+    }
+
+    public EnumOptionData getLockinPeriodFrequencyType() {
+        return this.lockinPeriodFrequencyType;
     }
 }

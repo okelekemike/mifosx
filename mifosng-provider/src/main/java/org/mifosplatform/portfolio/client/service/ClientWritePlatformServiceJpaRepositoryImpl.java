@@ -204,6 +204,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 gender = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER, genderId);
             }
 
+            CodeValue marital = null;
+            final Long maritalId = command.longValueOfParameterNamed(ClientApiConstants.maritalIdParamName);
+            if (maritalId != null) {
+                marital = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.MARITAL, maritalId);
+            }
+
             CodeValue clientType = null;
             final Long clientTypeId = command.longValueOfParameterNamed(ClientApiConstants.clientTypeIdParamName);
             if (clientTypeId != null) {
@@ -218,6 +224,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         ClientApiConstants.CLIENT_CLASSIFICATION, clientClassificationId);
             }
 
+            CodeValue kinRelationship = null;
+            final Long kinRelationshipId = command.longValueOfParameterNamed(ClientApiConstants.kinRelationshipIdParamName);
+            if (kinRelationshipId != null) {
+                kinRelationship = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                        ClientApiConstants.KIN_RELATIONSHIP, kinRelationshipId);
+            }
+
             SavingsProduct savingsProduct = null;
             final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             if (savingsProductId != null) {
@@ -227,7 +240,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProduct, gender,
-                    clientType, clientClassification, command);
+                    marital, clientType, clientClassification, kinRelationship, command);
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 validateParentGroupRulesBeforeClientActivation(newClient);
@@ -301,6 +314,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 clientForUpdate.updateGender(gender);
             }
 
+            if (changes.containsKey(ClientApiConstants.maritalIdParamName)) {
+
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.maritalIdParamName);
+                CodeValue marital = null;
+                if (newValue != null) {
+                    marital = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.MARITAL, newValue);
+                }
+                clientForUpdate.updateMarital(marital);
+            }
+
             if (changes.containsKey(ClientApiConstants.savingsProductIdParamName)) {
                 if (clientForUpdate.isActive()) { throw new ClientActiveForUpdateException(clientId,
                         ClientApiConstants.savingsProductIdParamName); }
@@ -340,6 +363,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                             ClientApiConstants.CLIENT_CLASSIFICATION, newValue);
                 }
                 clientForUpdate.updateClientClassification(newCodeVal);
+            }
+
+            if (changes.containsKey(ClientApiConstants.kinRelationshipIdParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.kinRelationshipIdParamName);
+                CodeValue newCodeVal = null;
+                if (newValue != null) {
+                    newCodeVal = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                            ClientApiConstants.KIN_RELATIONSHIP, newValue);
+                }
+                clientForUpdate.updateKinRelationship(newCodeVal);
             }
 
             if (!changes.isEmpty()) {
@@ -459,7 +492,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         if (staffId != null) {
             staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientForUpdate.getOffice().getHierarchy());
             /**
-             * TODO Vishwas: We maintain history of chage of loan officer w.r.t
+             * TODO Vishwas: We maintain history of change of loan officer w.r.t
              * loan in a history table, should we do the same for a client?
              * Especially useful when the change happens due to a transfer etc
              **/
@@ -585,7 +618,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     /*
-     * To become a part of a group, group may have set of criteria to be m et
+     * To become a part of a group, group may have set of criteria to be met
      * before client can become member of it.
      */
     private void validateParentGroupRulesBeforeClientActivation(Client client) {

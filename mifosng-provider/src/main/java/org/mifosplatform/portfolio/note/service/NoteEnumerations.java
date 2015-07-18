@@ -29,6 +29,9 @@ public class NoteEnumerations {
             case SAVING_ACCOUNT:
                 optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Saving account note");
             break;
+            case SAVING_TRANSACTION:
+                optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Saving transaction note");
+                break;
             case GROUP:
                 optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Group note");
             break;

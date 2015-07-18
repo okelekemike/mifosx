@@ -240,4 +240,16 @@ public class GroupGeneralData {
     public Collection<ClientData> clientMembers() {
         return this.clientMembers;
     }
+
+    public LocalDate getActivationDate() {
+        return this.activationDate;
+    }
+
+    public String getOfficeName() {
+        return this.officeName;
+    }
+
+    public Boolean isActive() {
+        return this.active;
+    }
 }

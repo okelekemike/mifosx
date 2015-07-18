@@ -76,6 +76,22 @@ public class CommandStrategyProvider {
         this.commandStrategies.put(CommandContext.resource("clients\\/\\d+").method("PUT").build(), "updateClientCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans").method("POST").build(), "applyLoanCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("savingsaccounts").method("POST").build(), "applySavingsCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("savingsaccounts\\/\\d+\\?command=activate").method("POST").build(),
+                "activateSavingsCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("savingsaccounts\\/\\d+\\?command=approve").method("POST").build(),
+                "approveSavingsCommandStrategy");
+        this.commandStrategies
+                .put(CommandContext.resource("recurringdepositaccounts").method("POST").build(), "applyRecurringDepositCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("recurringdepositaccounts\\/\\d+\\?command=activate").method("POST").build(),
+                "activateRecurringDepositCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("recurringdepositaccounts\\/\\d+\\?command=approve").method("POST").build(),
+                "approveRecurringDepositCommandStrategy");
+        this.commandStrategies
+                .put(CommandContext.resource("fixeddepositaccounts").method("POST").build(), "applyFixedDepositCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("fixeddepositaccounts\\/\\d+\\?command=activate").method("POST").build(),
+                "activateFixedDepositCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("fixeddepositaccounts\\/\\d+\\?command=approve").method("POST").build(),
+                "approveFixedDepositCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("POST").build(), "createChargeCommandStrategy");
         this.commandStrategies
                 .put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(), "collectChargesCommandStrategy");

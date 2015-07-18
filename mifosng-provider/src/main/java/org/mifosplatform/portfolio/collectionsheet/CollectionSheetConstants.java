@@ -23,6 +23,7 @@ public class CollectionSheetConstants {
     public static final String bulkRepaymentTransactionsParamName = "bulkRepaymentTransactions";
     public static final String bulkDisbursementTransactionsParamName = "bulkDisbursementTransactions";
     public static final String bulkSavingsDueTransactionsParamName = "bulkSavingsDueTransactions";
+    public static final String bulkSavingsWithdrawalTransactionsParamName = "bulkSavingsWithdrawalTransactions";
     public static final String noteParamName = "note";
     public static final String calendarIdParamName = "calendarId";
     public static final String officeIdParamName = "officeId";
@@ -39,11 +40,11 @@ public class CollectionSheetConstants {
 
     public static final Set<String> COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, transactionDateParamName, actualDisbursementDateParamName, bulkRepaymentTransactionsParamName,
-            bulkDisbursementTransactionsParamName, noteParamName, calendarIdParamName, clientsAttendanceParamName,
-            bulkSavingsDueTransactionsParamName, PaymentDetailConstants.paymentTypeParamName,
-            PaymentDetailConstants.accountNumberParamName, PaymentDetailConstants.checkNumberParamName,
-            PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
-            PaymentDetailConstants.bankNumberParamName));
+            bulkDisbursementTransactionsParamName, noteParamName, calendarIdParamName, clientsAttendanceParamName, 
+            bulkSavingsDueTransactionsParamName, bulkSavingsWithdrawalTransactionsParamName, 
+            PaymentDetailConstants.paymentTypeParamName, PaymentDetailConstants.accountNumberParamName, 
+            PaymentDetailConstants.checkNumberParamName, PaymentDetailConstants.routingCodeParamName, 
+            PaymentDetailConstants.receiptNumberParamName, PaymentDetailConstants.bankNumberParamName));
 
     public static final Set<String> INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, transactionDateParamName, actualDisbursementDateParamName, bulkRepaymentTransactionsParamName,

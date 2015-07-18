@@ -98,16 +98,65 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final List<CodeValueData> genderOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
+        final List<CodeValueData> maritalOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.MARITAL)
+        );
+
+        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
+
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
+        
+        final List<CodeValueData> kinRelationshipOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.KIN_RELATIONSHIP));
+
+        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, maritalOptions,
+                savingsProductDatas, clientTypeOptions, clientClassificationOptions, kinRelationshipOptions);
+    }
+
+    @Override
+    public ClientData retrieveTemplateByDepositType(final Long officeId, final boolean staffInSelectedOfficeOnly, final Integer depositType) {
+        this.context.authenticatedUser();
+
+        final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
+
+        final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+
+        final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForByType(depositType);
+
+        Collection<StaffData> staffOptions = null;
+
+        final boolean loanOfficersOnly = false;
+        if (staffInSelectedOfficeOnly) {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
+        } else {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(defaultOfficeId,
+                    loanOfficersOnly);
+        }
+        if (CollectionUtils.isEmpty(staffOptions)) {
+            staffOptions = null;
+        }
+        final List<CodeValueData> genderOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
+
+        final List<CodeValueData> maritalOptions = new ArrayList<>(
+              this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.MARITAL)
+        );
+
         final List<CodeValueData> clientTypeOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
 
         final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
 
-        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas,
-                clientTypeOptions, clientClassificationOptions);
-    }
+        final List<CodeValueData> kinRelationshipOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.KIN_RELATIONSHIP));
 
+        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, maritalOptions, savingsProductDatas,
+                clientTypeOptions, clientClassificationOptions, kinRelationshipOptions);
+    }
+    
     @Override
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
@@ -189,6 +238,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         if (searchParameters.isScopedByOfficeHierarchy()) {
             extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(searchParameters.getHierarchy() + "%");
+        }
+        
+        if(searchParameters.isOrphansOnly()){
+        	extraCriteria += " and c.id NOT IN (select client_id from m_group_client) ";
+        }
+        
+        if(searchParameters.isOrphansOnly()){
+        	extraCriteria += " and c.id NOT IN (select client_id from m_group_client) ";
         }
         
         if(searchParameters.isOrphansOnly()){
@@ -284,15 +341,45 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     .append("cvSubStatus.code_value as subStatusValue,cvSubStatus.code_description as subStatusDesc,c.office_id as officeId, o.name as officeName, ");
             sqlBuilder.append("c.transfer_to_office_id as transferToOfficeId, transferToOffice.name as transferToOfficeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
-            sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
+            sqlBuilder.append("c.fullname as fullname, c.dependents as dependents, c.display_name as displayName, ");
             sqlBuilder.append("c.mobile_no as mobileNo, ");
+            sqlBuilder.append("c.address_line_1 as addressLine1, ");
+            sqlBuilder.append("c.address_line_2 as addressLine2, ");
+            sqlBuilder.append("c.town as town, ");
+            sqlBuilder.append("c.city as city, ");
+            sqlBuilder.append("c.state as state, ");
+            sqlBuilder.append("c.zip as zip, ");
+            sqlBuilder.append("c.country as country, ");
+            sqlBuilder.append("c.residence_no as residenceNo, ");
+            sqlBuilder.append("c.email as email, ");
+            sqlBuilder.append("c.state_of_origin as stateOfOrigin, ");
+            sqlBuilder.append("c.lga_of_origin as lgaOfOrigin, ");
+            sqlBuilder.append("c.latitude as latitude, ");
+            sqlBuilder.append("c.longitude as longitude, ");
+            sqlBuilder.append("c.next_of_kin_firstname as kinfirstname, ");
+            sqlBuilder.append("c.next_of_kin_lastname as kinlastname, ");
+            sqlBuilder.append("c.next_of_kin_address_line_1 as kinaddressLine1, ");
+            sqlBuilder.append("c.next_of_kin_address_line_2 as kinaddressLine2, ");
+            sqlBuilder.append("c.next_of_kin_town as kintown, ");
+            sqlBuilder.append("c.next_of_kin_city as kincity, ");
+            sqlBuilder.append("c.next_of_kin_state as kinstate, ");
+            sqlBuilder.append("c.next_of_kin_zip as kinzip, ");
+            sqlBuilder.append("c.next_of_kin_country as kincountry, ");
+            sqlBuilder.append("c.next_of_kin_residence_no as kinresidenceNo, ");
+            sqlBuilder.append("c.next_of_kin_email as kinemail, ");
+            sqlBuilder.append("c.next_of_kin_latitude as kinlatitude, ");
+            sqlBuilder.append("c.next_of_kin_longitude as kinlongitude, ");
             sqlBuilder.append("c.date_of_birth as dateOfBirth, ");
             sqlBuilder.append("c.gender_cv_id as genderId, ");
             sqlBuilder.append("cv.code_value as genderValue, ");
+            sqlBuilder.append("c.marital_cv_id as maritalId, ");
+            sqlBuilder.append("cvmarital.code_value as maritalValue, ");
             sqlBuilder.append("c.client_type_cv_id as clienttypeId, ");
             sqlBuilder.append("cvclienttype.code_value as clienttypeValue, ");
             sqlBuilder.append("c.client_classification_cv_id as classificationId, ");
             sqlBuilder.append("cvclassification.code_value as classificationValue, ");
+            sqlBuilder.append("c.next_of_kin_relationship_cv_id as kinrelationshipId, ");
+            sqlBuilder.append("cvkinrelationship.code_value as kinrelationshipValue, ");
             sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName,");
             sqlBuilder.append("c.default_savings_product as savingsProductId, sp.name as savingsProductName, ");
@@ -323,9 +410,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
             sqlBuilder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
             sqlBuilder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
+            sqlBuilder.append("left join m_code_value cvmarital on cvmarital.id = c.marital_cv_id ");
             sqlBuilder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
             sqlBuilder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
             sqlBuilder.append("left join m_code_value cvSubStatus on cvSubStatus.id = c.sub_status ");
+            sqlBuilder.append("left join m_code_value cvkinrelationship on cvkinrelationship.id = c.next_of_kin_relationship_cv_id ");
 
             this.schema = sqlBuilder.toString();
         }
@@ -358,13 +447,45 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String middlename = rs.getString("middlename");
             final String lastname = rs.getString("lastname");
             final String fullname = rs.getString("fullname");
+            final Long dependents = JdbcSupport.getLong(rs, "dependents");
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final String mobileNo = rs.getString("mobileNo");
+            final String addressLine1 = rs.getString("addressLine1");
+            final String addressLine2 = rs.getString("addressLine2");
+            final String town = rs.getString("town");
+            final String city = rs.getString("city");
+            final String state = rs.getString("state");
+            final String zip = rs.getString("zip");
+            final String country = rs.getString("country");
+            final String residenceNo = rs.getString("residenceNo");
+            final String email = rs.getString("email");
+            final String stateOfOrigin = rs.getString("stateOfOrigin");
+            final String lgaOfOrigin = rs.getString("lgaOfOrigin");
+            final String latitude = rs.getString("latitude");
+            final String longitude = rs.getString("longitude");
+            final String kinfirstname = rs.getString("kinfirstname");
+            final String kinlastname = rs.getString("kinlastname");
+            final String kinaddressLine1 = rs.getString("kinaddressLine1");
+            final String kinaddressLine2 = rs.getString("kinaddressLine2");
+            final String kintown = rs.getString("kintown");
+            final String kincity = rs.getString("kincity");
+            final String kinstate = rs.getString("kinstate");
+            final String kinzip = rs.getString("kinzip");
+            final String kincountry = rs.getString("kincountry");
+            final String kinresidenceNo = rs.getString("kinresidenceNo");
+            final String kinemail = rs.getString("kinemail");
+            final String kinlatitude = rs.getString("kinlatitude");
+            final String kinlongitude = rs.getString("kinlongitude");
+            
             final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final Long genderId = JdbcSupport.getLong(rs, "genderId");
             final String genderValue = rs.getString("genderValue");
             final CodeValueData gender = CodeValueData.instance(genderId, genderValue);
+
+            final Long maritalId = JdbcSupport.getLong(rs, "maritalId");
+            final String maritalValue = rs.getString("maritalValue");
+            final CodeValueData marital = CodeValueData.instance(maritalId, maritalValue);
 
             final Long clienttypeId = JdbcSupport.getLong(rs, "clienttypeId");
             final String clienttypeValue = rs.getString("clienttypeValue");
@@ -373,6 +494,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long classificationId = JdbcSupport.getLong(rs, "classificationId");
             final String classificationValue = rs.getString("classificationValue");
             final CodeValueData classification = CodeValueData.instance(classificationId, classificationValue);
+            
+            final Long kinrelationshipId = JdbcSupport.getLong(rs, "kinrelationshipId");
+            final String kinrelationshipValue = rs.getString("kinrelationshipValue");
+            final CodeValueData kinrelationship = CodeValueData.instance(kinrelationshipId, kinrelationshipValue);
 
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
@@ -402,10 +527,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
                     closedByUsername, closedByFirstname, closedByLastname);
 
-            return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
-                    firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate,
-                    imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype,
-                    classification);
+            return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
+                    middlename, lastname, fullname, dependents, displayName, externalId, mobileNo, addressLine1, addressLine2, town, city, state, zip, country, 
+                    residenceNo, email, stateOfOrigin, lgaOfOrigin, latitude, longitude, kinfirstname, kinlastname, kinaddressLine1, kinaddressLine2, 
+                    kintown, kincity, kinstate, kinzip, kincountry, kinresidenceNo, kinemail, kinlatitude, kinlongitude, dateOfBirth, gender, 
+                    marital, activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
+                    clienttype, classification, kinrelationship);
 
         }
     }
@@ -436,15 +563,45 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("cvSubStatus.code_value as subStatusValue,cvSubStatus.code_description as subStatusDesc,c.office_id as officeId, o.name as officeName, ");
             builder.append("c.transfer_to_office_id as transferToOfficeId, transferToOffice.name as transferToOfficeName, ");
             builder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
-            builder.append("c.fullname as fullname, c.display_name as displayName, ");
+            builder.append("c.fullname as fullname, c.dependents as dependents, c.display_name as displayName, ");
             builder.append("c.mobile_no as mobileNo, ");
+            builder.append("c.address_line_1 as addressLine1, ");
+            builder.append("c.address_line_2 as addressLine2, ");
+            builder.append("c.town as town, ");
+            builder.append("c.city as city, ");
+            builder.append("c.state as state, ");
+            builder.append("c.zip as zip, ");
+            builder.append("c.country as country, ");
+            builder.append("c.residence_no as residenceNo, ");
+            builder.append("c.email as email, ");
+            builder.append("c.state_of_origin as stateOfOrigin, ");
+            builder.append("c.lga_of_origin as lgaOfOrigin, ");
+            builder.append("c.latitude as latitude, ");
+            builder.append("c.longitude as longitude, ");
+            builder.append("c.next_of_kin_firstname as kinfirstname, ");
+            builder.append("c.next_of_kin_lastname as kinlastname, ");
+            builder.append("c.next_of_kin_address_line_1 as kinaddressLine1, ");
+            builder.append("c.next_of_kin_address_line_2 as kinaddressLine2, ");
+            builder.append("c.next_of_kin_town as kintown, ");
+            builder.append("c.next_of_kin_city as kincity, ");
+            builder.append("c.next_of_kin_state as kinstate, ");
+            builder.append("c.next_of_kin_zip as kinzip, ");
+            builder.append("c.next_of_kin_country as kincountry, ");
+            builder.append("c.next_of_kin_residence_no as kinresidenceNo, ");
+            builder.append("c.next_of_kin_email as kinemail, ");
+            builder.append("c.next_of_kin_latitude as kinlatitude, ");
+            builder.append("c.next_of_kin_longitude as kinlongitude, ");
             builder.append("c.date_of_birth as dateOfBirth, ");
             builder.append("c.gender_cv_id as genderId, ");
             builder.append("cv.code_value as genderValue, ");
+            builder.append("c.marital_cv_id as maritalId, ");
+            builder.append("cvmarital.code_value as maritalValue, ");
             builder.append("c.client_type_cv_id as clienttypeId, ");
             builder.append("cvclienttype.code_value as clienttypeValue, ");
             builder.append("c.client_classification_cv_id as classificationId, ");
             builder.append("cvclassification.code_value as classificationValue, ");
+            builder.append("c.next_of_kin_relationship_cv_id as kinrelationshipId, ");
+            builder.append("cvkinrelationship.code_value as kinrelationshipValue, ");
 
             builder.append("c.submittedon_date as submittedOnDate, ");
             builder.append("sbu.username as submittedByUsername, ");
@@ -474,8 +631,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
             builder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
             builder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
+            builder.append("left join m_code_value cvmarital on cvmarital.id = c.marital_cv_id ");
             builder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
             builder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
+            builder.append("left join m_code_value cvkinrelationship on cvkinrelationship.id = c.next_of_kin_relationship_cv_id ");
             builder.append("left join m_code_value cvSubStatus on cvSubStatus.id = c.sub_status ");
 
             this.schema = builder.toString();
@@ -509,13 +668,44 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String middlename = rs.getString("middlename");
             final String lastname = rs.getString("lastname");
             final String fullname = rs.getString("fullname");
+            final Long dependents = JdbcSupport.getLong(rs, "dependents");
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final String mobileNo = rs.getString("mobileNo");
+            final String addressLine1 = rs.getString("addressLine1");
+            final String addressLine2 = rs.getString("addressLine2");
+            final String town = rs.getString("town");
+            final String city = rs.getString("city");
+            final String state = rs.getString("state");
+            final String zip = rs.getString("zip");
+            final String country = rs.getString("country");
+            final String residenceNo = rs.getString("residenceNo");
+            final String email = rs.getString("email");
+            final String stateOfOrigin = rs.getString("stateOfOrigin");
+            final String lgaOfOrigin = rs.getString("lgaOfOrigin");
+            final String latitude = rs.getString("latitude");
+            final String longitude = rs.getString("longitude");
+            final String kinfirstname = rs.getString("kinfirstname");
+            final String kinlastname = rs.getString("kinlastname");
+            final String kinaddressLine1 = rs.getString("kinaddressLine1");
+            final String kinaddressLine2 = rs.getString("kinaddressLine2");
+            final String kintown = rs.getString("kintown");
+            final String kincity = rs.getString("kincity");
+            final String kinstate = rs.getString("kinstate");
+            final String kinzip = rs.getString("kinzip");
+            final String kincountry = rs.getString("kincountry");
+            final String kinresidenceNo = rs.getString("kinresidenceNo");
+            final String kinemail = rs.getString("kinemail");
+            final String kinlatitude = rs.getString("kinlatitude");
+            final String kinlongitude = rs.getString("kinlongitude");
             final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final Long genderId = JdbcSupport.getLong(rs, "genderId");
             final String genderValue = rs.getString("genderValue");
             final CodeValueData gender = CodeValueData.instance(genderId, genderValue);
+
+            final Long maritalId = JdbcSupport.getLong(rs, "maritalId");
+            final String maritalValue = rs.getString("maritalValue");
+            final CodeValueData marital = CodeValueData.instance(maritalId, maritalValue);
 
             final Long clienttypeId = JdbcSupport.getLong(rs, "clienttypeId");
             final String clienttypeValue = rs.getString("clienttypeValue");
@@ -524,6 +714,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long classificationId = JdbcSupport.getLong(rs, "classificationId");
             final String classificationValue = rs.getString("classificationValue");
             final CodeValueData classification = CodeValueData.instance(classificationId, classificationValue);
+
+            final Long kinrelationshipId = JdbcSupport.getLong(rs, "kinrelationshipId");
+            final String kinrelationshipValue = rs.getString("kinrelationshipValue");
+            final CodeValueData kinrelationship = CodeValueData.instance(kinrelationshipId, kinrelationshipValue);
 
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
@@ -552,10 +746,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
                     closedByUsername, closedByFirstname, closedByLastname);
 
-            return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
-                    firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate,
-                    imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype,
-                    classification);
+            return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
+                    middlename, lastname, fullname, dependents, displayName, externalId, mobileNo, addressLine1, addressLine2, town, city, state, zip, country, 
+                    residenceNo, email, stateOfOrigin, lgaOfOrigin, latitude, longitude, kinfirstname, kinlastname, kinaddressLine1, kinaddressLine2, 
+                    kintown, kincity, kinstate, kinzip, kincountry, kinresidenceNo, kinemail, kinlatitude, kinlongitude, dateOfBirth, gender, 
+                    marital, activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
+                    clienttype, classification, kinrelationship);
 
         }
     }
@@ -626,7 +822,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         public String clientLookupByIdentifierSchema() {
             return "c.id as id, c.account_no as accountNo, c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, "
-                    + "c.fullname as fullname, c.display_name as displayName," + "c.office_id as officeId, o.name as officeName "
+                    + "c.fullname as fullname, c.dependents as dependents, c.display_name as displayName," + "c.office_id as officeId, o.name as officeName "
                     + " from m_client c, m_office o, m_client_identifier ci " + "where o.id = c.office_id and c.id=ci.client_id "
                     + "and ci.document_type_id= ? and ci.document_key like ?";
         }
@@ -641,12 +837,13 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String middlename = rs.getString("middlename");
             final String lastname = rs.getString("lastname");
             final String fullname = rs.getString("fullname");
+            final Long dependents = rs.getLong("dependents");
             final String displayName = rs.getString("displayName");
 
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
 
-            return ClientData.clientIdentifier(id, accountNo, firstname, middlename, lastname, fullname, displayName, officeId, officeName);
+            return ClientData.clientIdentifier(id, accountNo, firstname, middlename, lastname, fullname, dependents, displayName, officeId, officeName);
         }
     }
 
@@ -663,7 +860,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final List<CodeValueData> narrations = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientNarrations));
         final Collection<CodeValueData> clientTypeOptions = null;
         final Collection<CodeValueData> clientClassificationOptions = null;
-        return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions);
+        return ClientData.template(null, null, null, null, narrations, null, null, null, clientTypeOptions, clientClassificationOptions, null);
     }
 
 }

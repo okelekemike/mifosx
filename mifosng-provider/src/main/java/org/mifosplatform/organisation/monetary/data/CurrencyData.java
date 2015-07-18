@@ -70,4 +70,12 @@ public class CurrencyData {
 
         return builder.toString();
     }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getDisplaySymbol() {
+        return this.displaySymbol;
+    }
 }

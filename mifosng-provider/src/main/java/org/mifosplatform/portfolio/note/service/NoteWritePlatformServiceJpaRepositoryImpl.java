@@ -23,6 +23,12 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.mifosplatform.portfolio.savings.exception.SavingsAccountNotFoundException;
+import org.mifosplatform.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.note.domain.NoteType;
@@ -38,18 +44,21 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
     private final NoteRepository noteRepository;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
-    // private final SavingAccountRepository savingAccountRepository;
+    private final SavingsAccountRepository savingsAccountRepository;
+    private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final LoanRepository loanRepository;
     private final LoanTransactionRepository loanTransactionRepository;
     private final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public NoteWritePlatformServiceJpaRepositoryImpl(final NoteRepository noteRepository, final ClientRepositoryWrapper clientRepository,
-            final GroupRepository groupRepository, final LoanRepository loanRepository,
-            final LoanTransactionRepository loanTransactionRepository, final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final GroupRepository groupRepository, final SavingsAccountRepository savingsAccountRepository, final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+            final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository, final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.noteRepository = noteRepository;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
+        this.savingsAccountRepository = savingsAccountRepository;
+        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -143,26 +152,48 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 .build();
     }
 
-    // private CommandProcessingResult createSavingAccountNote(final JsonCommand
-    // command) {
-    //
-    // final Long resourceId = command.getSupportedEntityId();
-    //
-    // final SavingAccount savingAccount =
-    // this.savingAccountRepository.findOne(resourceId);
-    // if (savingAccount == null) { throw new
-    // SavingAccountNotFoundException(resourceId); }
-    //
-    // final String note = command.stringValueOfParameterNamed("note");
-    // final Note newNote = Note.savingNote(savingAccount, note);
-    //
-    // this.noteRepository.save(newNote);
-    //
-    // return new CommandProcessingResultBuilder() //
-    // .withCommandId(command.commandId()) //
-    // .withEntityId(newNote.getId()) //
-    // .withClientId(savingAccount.getClient().getId()).withOfficeId(savingAccount.getClient().getOffice().getId()).build();
-    // }
+    private CommandProcessingResult createSavingAccountNote(final JsonCommand command) {
+        final Long resourceId = command.getSavingsId();
+        
+        final SavingsAccount savingsAccount =  this.savingsAccountRepository.findById(resourceId);
+        
+        if (savingsAccount == null) { throw new SavingsAccountNotFoundException(resourceId); }
+        
+        final String note = command.stringValueOfParameterNamed("note");
+        
+        final Note newNote = Note.savingNote(savingsAccount, note);
+        
+        this.noteRepository.save(newNote);
+        
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(newNote.getId()) 
+                .withOfficeId(savingsAccount.getClient().getOffice().getId())
+                .withSavingsId(savingsAccount.getId())
+                .build();
+    }
+
+    private CommandProcessingResult createSavingAccountTransactionNote(final JsonCommand command) {
+        final Long savingAccountId = command.getSavingsId();
+        final Long resourceId = command.subentityId();
+
+        final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(resourceId, savingAccountId);
+        if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingAccountId, resourceId); }
+        
+        final SavingsAccount savingsAccount =  this.savingsAccountRepository.findById(savingAccountId);
+
+        final String note = command.stringValueOfParameterNamed("note");
+        final Note newNote = Note.savingTransactionNote(savingsAccount, savingsAccountTransaction, note);
+
+        this.noteRepository.save(newNote);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(newNote.getId()) 
+                .withOfficeId(savingsAccount.getClient().getOffice().getId())//
+                .withSavingsId(savingsAccount.getId())// 
+                .build();
+    }
 
     @Override
     public CommandProcessingResult createNote(final JsonCommand command) {
@@ -184,9 +215,12 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             case LOAN_TRANSACTION: {
                 return createLoanTransactionNote(command);
             }
-            // case SAVING_ACCOUNT: {
-            // return createSavingAccountNote(command);
-            // }
+            case SAVING_ACCOUNT: {
+                return createSavingAccountNote(command);
+           }
+            case SAVING_TRANSACTION: {
+                return createSavingAccountTransactionNote(command);
+            }
             default:
                 throw new NoteResourceNotSupportedException(resourceUrl);
         }
@@ -208,8 +242,11 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 resourceUrl = NoteType.LOAN.getApiUrl();
             }
         } else if (command.getSavingsId() != null) {
-            //TODO: SAVING_TRANSACTION type need to be add.
-            resourceUrl = NoteType.SAVING_ACCOUNT.getApiUrl();
+             if (command.subentityId() != null) {
+                resourceUrl = NoteType.SAVING_TRANSACTION.getApiUrl();
+            } else {
+                resourceUrl = NoteType.SAVING_ACCOUNT.getApiUrl();
+            }
         } else {
             resourceUrl = "";
         }
@@ -290,8 +327,13 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             this.noteRepository.saveAndFlush(noteForUpdate);
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(noteForUpdate.getId())
-                .withLoanId(loan.getId()).withOfficeId(loan.getOfficeId()).with(changes).build();
+        return new CommandProcessingResultBuilder()
+                .withCommandId(command.commandId())
+                .withEntityId(noteForUpdate.getId())
+                .withLoanId(loan.getId())
+                .withOfficeId(loan.getOfficeId())
+                .with(changes)
+                .build();
     }
 
     private CommandProcessingResult updateLoanTransactionNote(final JsonCommand command) {
@@ -315,45 +357,72 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             this.noteRepository.saveAndFlush(noteForUpdate);
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(noteForUpdate.getId())
-                .withLoanId(loan.getId()).withOfficeId(loan.getOfficeId()).with(changes).build();
+        return new CommandProcessingResultBuilder()
+                .withCommandId(command.commandId())
+                .withEntityId(noteForUpdate.getId())
+                .withLoanId(loan.getId())
+                .withOfficeId(loan.getOfficeId())
+                .with(changes)
+                .build();
     }
 
-    // private CommandProcessingResult updateSavingAccountNote(final JsonCommand
-    // command) {
-    //
-    // final Long resourceId = command.getSupportedEntityId();
-    // final Long noteId = command.entityId();
-    // final String resourceUrl = command.getSupportedEntityType();
-    //
-    // final NoteType type = NoteType.fromApiUrl(resourceUrl);
-    //
-    // final SavingAccount savingAccount =
-    // this.savingAccountRepository.findOne(resourceId);
-    // if (savingAccount == null) { throw new
-    // SavingAccountNotFoundException(resourceId); }
-    //
-    // final Note noteForUpdate =
-    // this.noteRepository.findBySavingAccountIdAndId(resourceId, noteId);
-    //
-    // if (noteForUpdate == null) { throw new NoteNotFoundException(noteId,
-    // resourceId, type.name().toLowerCase()); }
-    //
-    // final Map<String, Object> changes = noteForUpdate.update(command);
-    //
-    // if (!changes.isEmpty()) {
-    // this.noteRepository.saveAndFlush(noteForUpdate);
-    // }
-    //
-    // return new CommandProcessingResultBuilder()
-    // //
-    // .withCommandId(command.commandId())
-    // //
-    // .withEntityId(noteForUpdate.getId())
-    // //
-    // .withClientId(savingAccount.getClient().getId()).withOfficeId(savingAccount.getClient().getOffice().getId()).with(changes)
-    // .build();
-    // }
+    private CommandProcessingResult updateSavingAccountNote(final JsonCommand command) {
+    
+        final Long resourceId = command.getSavingsId();
+        final Long noteId = command.entityId();
+                
+        final NoteType type = NoteType.SAVING_ACCOUNT;
+    
+        final SavingsAccount savingsAccount = this.savingsAccountRepository.findById(resourceId);
+        if (savingsAccount == null) { throw new SavingsAccountNotFoundException(resourceId); }        
+        final Note noteForUpdate = this.noteRepository.findBySavingsAccountIdAndId(resourceId, noteId);
+        
+        if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
+    
+        final Map<String, Object> changes = noteForUpdate.update(command);
+    
+        if (!changes.isEmpty()) {
+            this.noteRepository.saveAndFlush(noteForUpdate);
+        }
+    
+        return new CommandProcessingResultBuilder()   
+                .withCommandId(command.commandId())
+                .withEntityId(noteForUpdate.getId())
+                .withOfficeId(savingsAccount.getClient().getOffice().getId())
+                .withSavingsId(savingsAccount.getId())// 
+                .with(changes)
+                .build();
+    }
+
+    private CommandProcessingResult updateSavingAccountTransactionNote(final JsonCommand command) {
+        final Long savingsAccountId = command.getSavingsId();
+        final Long resourceId = command.subentityId();
+        final Long noteId = command.entityId();
+                
+        final NoteType type = NoteType.SAVING_ACCOUNT;
+    
+        final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(resourceId, savingsAccountId);
+        if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(resourceId, savingsAccountId); }        
+        final Note noteForUpdate = this.noteRepository.findBySavingsAccountTransactionIdAndId(resourceId, noteId);
+        
+        if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
+    
+        final Map<String, Object> changes = noteForUpdate.update(command);
+        
+        final SavingsAccount savingsAccount = this.savingsAccountRepository.findById(savingsAccountId);
+        
+        if (!changes.isEmpty()) {
+            this.noteRepository.saveAndFlush(noteForUpdate);
+        }
+    
+        return new CommandProcessingResultBuilder()   
+                .withCommandId(command.commandId())
+                .withEntityId(noteForUpdate.getId())
+                .withOfficeId(savingsAccount.getClient().getOffice().getId())
+                .withSavingsId(savingsAccount.getId())// 
+                .with(changes)
+                .build();
+    }
 
     @Override
     public CommandProcessingResult updateNote(final JsonCommand command) {
@@ -376,9 +445,12 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             case LOAN_TRANSACTION: {
                 return updateLoanTransactionNote(command);
             }
-            // case SAVING_ACCOUNT: {
-            // return updateSavingAccountNote(command);
-            // }
+            case SAVING_ACCOUNT: {
+                return updateSavingAccountNote(command);
+            }
+            case SAVING_TRANSACTION: {
+                return updateSavingAccountTransactionNote(command);
+            }
             default:
                 throw new NoteResourceNotSupportedException(resourceUrl);
         }
@@ -423,13 +495,15 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 noteForUpdate = this.noteRepository.findByLoanTransactionIdAndId(resourceId, noteId);
             }
             break;
-            // case SAVING_ACCOUNT: {
-            // noteForUpdate =
-            // this.noteRepository.findBySavingAccountIdAndId(resourceId,
-            // noteId);
-            // }
-            // break;
-            case SAVING_ACCOUNT:
+            case SAVING_ACCOUNT: {
+                resourceId = command.getSavingsId();
+                noteForUpdate = this.noteRepository.findBySavingsAccountIdAndId(resourceId, noteId);
+            }
+            break;
+            case SAVING_TRANSACTION: {
+                resourceId = command.subentityId();
+                noteForUpdate = this.noteRepository.findBySavingsAccountTransactionIdAndId(resourceId, noteId);
+            }
             break;
         }
         if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }

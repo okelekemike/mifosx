@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.client.api;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 
 import org.mifosplatform.portfolio.client.data.ClientData;
 
@@ -23,6 +24,8 @@ public class ClientApiConstants {
     public static final String GENDER = "Gender";
     public static final String CLIENT_TYPE = "ClientType";
     public static final String CLIENT_CLASSIFICATION = "ClientClassification";
+    public static final String KIN_RELATIONSHIP = "KinRelationship";
+    public static final String MARITAL = "Marital";
     // general
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
@@ -37,6 +40,35 @@ public class ClientApiConstants {
     public static final String middlenameParamName = "middlename";
     public static final String lastnameParamName = "lastname";
     public static final String fullnameParamName = "fullname";
+    public static final String dependentsParamName = "dependents";
+    public static final String addressLine1ParamName = "addressLine1";
+    public static final String addressLine2ParamName = "addressLine2";
+    public static final String townParamName = "town";
+    public static final String cityParamName = "city";
+    public static final String stateParamName = "state";
+    public static final String zipParamName = "zip";
+    public static final String countryParamName = "country";
+    public static final String residenceNoParamName = "residenceNo";
+    public static final String emailParamName = "email";
+    public static final String stateOfOriginParamName = "stateOfOrigin";
+    public static final String lgaOfOriginParamName = "lgaOfOrigin";
+    public static final String longitudeParamName = "longitude";
+    public static final String latitudeParamName = "latitude";
+    public static final String kinFirstnameParamName = "kinfirstname";
+    public static final String kinLastnameParamName = "kinlastname";
+    public static final String kinAddressLine1ParamName = "kinaddressLine1";
+    public static final String kinAddressLine2ParamName = "kinaddressLine2";
+    public static final String kinTownParamName = "kintown";
+    public static final String kinCityParamName = "kincity";
+    public static final String kinStateParamName = "kinstate";
+    public static final String kinZipParamName = "kinzip";
+    public static final String kinCountryParamName = "kincountry";
+    public static final String kinResidenceNoParamName = "kinresidenceNo";
+    public static final String kinEmailParamName = "kinemail";
+    public static final String kinLongitudeParamName = "kinlongitude";
+    public static final String kinLatitudeParamName = "kinlatitude";
+    public static final String kinRelationshipParamName = "kinRelationship";
+    public static final String kinRelationshipIdParamName = "kinRelationshipId";
     public static final String officeIdParamName = "officeId";
     public static final String transferOfficeIdParamName = "transferOfficeIdParamName";
     public static final String activeParamName = "active";
@@ -57,6 +89,8 @@ public class ClientApiConstants {
     public static final String dateOfBirthParamName = "dateOfBirth";
     public static final String genderIdParamName = "genderId";
     public static final String genderParamName = "gender";
+    public static final String maritalIdParamName = "maritalId";
+    public static final String maritalParamName = "marital";
     public static final String clientTypeIdParamName = "clientTypeId";
     public static final String clientTypeParamName = "clientType";
     public static final String clientClassificationIdParamName = "clientClassificationId";
@@ -84,15 +118,22 @@ public class ClientApiConstants {
 
     public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName,
-            middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName, activeParamName, activationDateParamName,
-            staffIdParamName, submittedOnDateParamName, savingsProductIdParamName, dateOfBirthParamName, genderIdParamName,
-            clientTypeIdParamName, clientClassificationIdParamName));
+            middlenameParamName, lastnameParamName, fullnameParamName, dependentsParamName, addressLine1ParamName, addressLine2ParamName, townParamName,
+            cityParamName, stateParamName, zipParamName, countryParamName, residenceNoParamName, emailParamName, stateOfOriginParamName, 
+            lgaOfOriginParamName, longitudeParamName, latitudeParamName, kinFirstnameParamName, kinLastnameParamName, kinAddressLine1ParamName, 
+            kinAddressLine2ParamName, kinTownParamName, kinCityParamName, kinStateParamName, kinZipParamName, kinCountryParamName, kinResidenceNoParamName, 
+            kinEmailParamName, kinLongitudeParamName, kinLatitudeParamName, officeIdParamName, activeParamName, activationDateParamName, 
+            staffIdParamName, submittedOnDateParamName, savingsProductIdParamName, dateOfBirthParamName, genderIdParamName, maritalIdParamName,
+            clientTypeIdParamName, clientClassificationIdParamName, kinRelationshipIdParamName));
 
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName, middlenameParamName,
-
-            lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName,
-            dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName,submittedOnDateParamName));
+            lastnameParamName, fullnameParamName, dependentsParamName, addressLine1ParamName, addressLine2ParamName, townParamName, cityParamName, stateParamName,
+            zipParamName, countryParamName, residenceNoParamName, emailParamName, stateOfOriginParamName, lgaOfOriginParamName, longitudeParamName, 
+            latitudeParamName, kinFirstnameParamName, kinLastnameParamName, kinAddressLine1ParamName, kinAddressLine2ParamName, kinTownParamName, 
+            kinCityParamName, kinStateParamName, kinZipParamName, kinCountryParamName, kinResidenceNoParamName, kinEmailParamName, kinLongitudeParamName, 
+            kinLatitudeParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName, dateOfBirthParamName, 
+            genderIdParamName, maritalIdParamName, clientTypeIdParamName, clientClassificationIdParamName, kinRelationshipIdParamName,submittedOnDateParamName));
 
 
     /**
@@ -102,10 +143,14 @@ public class ClientApiConstants {
      */
     public static final Set<String> CLIENT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, accountNoParamName,
             externalIdParamName, statusParamName, activeParamName, activationDateParamName, firstnameParamName, middlenameParamName,
-            lastnameParamName, fullnameParamName, displayNameParamName, mobileNoParamName, officeIdParamName, officeNameParamName,
-            transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName, imagePresentParamName,
+            lastnameParamName, fullnameParamName, dependentsParamName, displayNameParamName, mobileNoParamName, officeIdParamName, officeNameParamName,
+            addressLine1ParamName, addressLine2ParamName, townParamName, cityParamName, stateParamName, zipParamName, countryParamName, 
+            residenceNoParamName, emailParamName, stateOfOriginParamName, lgaOfOriginParamName, longitudeParamName, latitudeParamName, 
+            kinFirstnameParamName, kinLastnameParamName, kinAddressLine1ParamName, kinAddressLine2ParamName, kinTownParamName, kinCityParamName, 
+            kinStateParamName, kinZipParamName, kinCountryParamName, kinResidenceNoParamName, kinEmailParamName, kinLongitudeParamName, 
+            kinLatitudeParamName, transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName, imagePresentParamName,
             staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName, staffOptionsParamName,
-            dateOfBirthParamName, genderParamName,clientTypeParamName,clientClassificationParamName));
+            dateOfBirthParamName, genderParamName, maritalParamName, clientTypeParamName, clientClassificationParamName, kinRelationshipParamName));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));

@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 public class NotesApiResource {
 
     private final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "groupId", "loanId",
-            "loanTransactionId", "depositAccountId", "savingAccountId", "noteType", "note", "createdById", "createdByUsername",
+            "loanTransactionId", "savingAccountId", "savingTransactionId", "noteType", "note", "createdById", "createdByUsername",
             "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
 
     private final PlatformSecurityContext context;
@@ -188,6 +188,12 @@ public class NotesApiResource {
                 resourceNameForPermissions = "SAVINGNOTE";
                 resourceDetails.withSavingsId(resourceId);
             break;
+            case SAVING_TRANSACTION:
+                resourceNameForPermissions = "SAVINGTRANSACTIONNOTE";
+                // updating loanId, to distinguish saving transaction note and loan transaction note as we are using subEntityId for both.
+                resourceDetails.withSavingsId(resourceId);
+                resourceDetails.withSubEntityId(resourceId);
+                break;
             case GROUP:
                 resourceNameForPermissions = "GROUPNOTE";
                 resourceDetails.withGroupId(resourceId);

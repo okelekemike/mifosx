@@ -156,6 +156,11 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).integerGreaterThanZero();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.maritalIdParamName, element)) {
+            final Integer maritalId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.maritalIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.maritalIdParamName).value(maritalId).integerGreaterThanZero();
+        }
+
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientTypeIdParamName, element)) {
             final Integer clientType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.clientTypeIdParamName,
                     element);
@@ -166,6 +171,12 @@ public final class ClientDataValidator {
             final Integer clientClassification = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     ClientApiConstants.clientClassificationIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.clientClassificationIdParamName).value(clientClassification)
+                    .integerGreaterThanZero();
+        }
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.kinRelationshipIdParamName, element)) {
+            final Integer kinRelationship = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                    ClientApiConstants.kinRelationshipIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.kinRelationshipIdParamName).value(kinRelationship)
                     .integerGreaterThanZero();
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -358,6 +369,12 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).integerGreaterThanZero();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.maritalIdParamName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            final Integer maritalId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.maritalIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.maritalIdParamName).value(maritalId).integerGreaterThanZero();
+        }
+
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientTypeIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer clientType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.clientTypeIdParamName,
@@ -372,6 +389,15 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.clientClassificationIdParamName).value(clientClassification)
                     .integerGreaterThanZero();
         }
+        
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.kinRelationshipIdParamName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            final Integer kinRelationship = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                    ClientApiConstants.kinRelationshipIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.kinRelationshipIdParamName).value(kinRelationship)
+                    .integerGreaterThanZero();
+        }
+
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.submittedOnDateParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final LocalDate submittedDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.submittedOnDateParamName,

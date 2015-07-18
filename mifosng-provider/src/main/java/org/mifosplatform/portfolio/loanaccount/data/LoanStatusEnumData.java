@@ -48,4 +48,8 @@ public class LoanStatusEnumData {
     public String value() {
         return this.value;
     }
+    
+    public Boolean isActive() {
+        return this.active;
+    }
 }

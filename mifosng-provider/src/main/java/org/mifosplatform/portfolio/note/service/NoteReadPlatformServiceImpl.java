@@ -37,6 +37,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
         public String schema() {
             return " select n.id as id, n.client_id as clientId, n.group_id as groupId, n.loan_id as loanId, n.loan_transaction_id as transactionId, "
+                    + " n.savings_account_id as savingId, n.savings_account_transaction_id as savingTransactionId, "
                     + " n.note_type_enum as noteTypeEnum, n.note as note, n.created_date as createdDate, n.createdby_id as createdById, "
                     + " cb.username as createdBy, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById, mb.username as modifiedBy "
                     + " from m_note n left join m_appuser cb on cb.id=n.createdby_id left join m_appuser mb on mb.id=n.lastmodifiedby_id ";
@@ -52,8 +53,8 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Long transactionId = JdbcSupport.getLong(rs, "transactionId");
             // final Long depositAccountId = JdbcSupport.getLong(rs,
             // "depositAccountId");
-            // final Long savingAccountId = JdbcSupport.getLong(rs,
-            // "savingAccountId");
+            final Long savingId = JdbcSupport.getLong(rs, "savingId");
+            final Long savingTransactionId = JdbcSupport.getLong(rs, "savingTransactionId");
             final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
             final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
             final String note = rs.getString("note");
@@ -63,7 +64,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
             final String createdByUsername = rs.getString("createdBy");
             final String updatedByUsername = rs.getString("modifiedBy");
-            return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
+            return new NoteData(id, clientId, groupId, loanId, transactionId, savingId, savingTransactionId, noteType, note, createdDate, createdById,
                     createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
         }
     }
@@ -101,18 +102,25 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
         String conditionSql = "";
         switch (noteType) {
             case CLIENT:
-                conditionSql = " n.client_id = ? and note_type_enum = " + NoteType.CLIENT.getValue();
+                conditionSql = " n.client_id = ? and note_type_enum = " 
+                        + NoteType.CLIENT.getValue();
             break;
             case LOAN:
-                conditionSql = " n.loan_id = ? and ( n.note_type_enum = " + NoteType.LOAN.getValue() + " or n.note_type_enum = "
+                conditionSql = " n.loan_id = ? and ( n.note_type_enum = " 
+                        + NoteType.LOAN.getValue() + " or n.note_type_enum = "
                         + NoteType.LOAN_TRANSACTION.getValue() + " )";
             break;
             case LOAN_TRANSACTION:
                 conditionSql = " n.loan_transaction_id = ? ";
             break;
             case SAVING_ACCOUNT:
-                conditionSql = " n.saving_account_id = ? ";
+                conditionSql = " n.savings_account_id = ? and ( n.note_type_enum = " 
+                        + NoteType.SAVING_ACCOUNT.getValue() + " or n.note_type_enum = "
+                        + NoteType.SAVING_TRANSACTION.getValue() + " )";
             break;
+            case SAVING_TRANSACTION:
+                conditionSql = " n.savings_account_transaction_id = ? ";
+                break;
             case GROUP:
                 conditionSql = " n.group_id = ? ";
             break;

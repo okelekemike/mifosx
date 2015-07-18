@@ -81,11 +81,13 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
     @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final CenterReadPlatformService centerReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
+            final CenterReadPlatformService centerReadPlatformService, 
+            final GroupReadPlatformService groupReadPlatformService,
             final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
             final CalendarRepositoryWrapper calendarRepositoryWrapper,
             final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, 
+            final PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -222,7 +224,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("LEFT JOIN m_staff sf ON sf.id = gp.staff_id ")
                     .append("JOIN m_group_client gc ON gc.group_id = gp.id ")
                     .append("JOIN m_client cl ON cl.id = gc.client_id ")
-                    .append("LEFT JOIN m_loan ln ON cl.id = ln.client_id  and ln.group_id=gp.id AND ln.group_id is not null AND ( ln.loan_status_id = 300 OR ( ln.loan_status_id =200 AND ln.expected_disbursedon_date <= :dueDate )) ")
+                    .append("LEFT JOIN m_loan ln ON cl.id = ln.client_id AND ( ln.loan_status_id = 300 OR ( ln.loan_status_id =200 AND ln.expected_disbursedon_date <= :dueDate )) ") //  and ln.group_id=gp.id AND ln.group_id is not null
                     .append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ")
                     .append("LEFT JOIN m_currency rc on rc.`code` = ln.currency_code ")
                     .append("LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ")
@@ -273,8 +275,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             CurrencyData currencyData = null;
             if (currencyCode != null) {
-                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                        currencyNameCode);
+                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol, currencyNameCode);
             }
 
             final BigDecimal disbursementAmount = rs.getBigDecimal("disbursementAmount");
@@ -392,7 +393,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 Collection<SavingsDueData> savingsDatas = clientSavingsData.getSavings();
                 for (SavingsDueData savingsDueData : savingsDatas) {
                     final SavingsProductData savingsProduct = SavingsProductData.lookup(savingsDueData.productId(),
-                            savingsDueData.productName());
+                            savingsDueData.productName(), savingsDueData.productDepositType());
                     if (!savingsProducts.contains(savingsProduct)) {
                         savingsProducts.add(savingsProduct);
                     }
@@ -462,6 +463,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("sa.id As savingsId, ")
                     .append("sa.account_no As accountId, ")
                     .append("sa.status_enum As accountStatusId, ")
+                    .append("sa.deposit_type_enum As accountTypeId, ")
+                    .append("sp.deposit_type_enum As productDepositType, ")
                     .append("sp.short_name As productShortName, ")
                     .append("sp.id As productId, ")
                     .append("sa.currency_code as currencyCode, ")
@@ -470,7 +473,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("rc.`name` as currencyName, ")
                     .append("rc.display_symbol as currencyDisplaySymbol, ")
                     .append("rc.internationalized_name_code as currencyNameCode, ")
-                    .append("sum(ifnull(mss.deposit_amount,0) - ifnull(mss.deposit_amount_completed_derived,0)) as dueAmount ")
+                    .append("sum(ifnull(mss.deposit_amount,0) - ifnull(mss.deposit_amount_completed_derived,0)) as dueAmount, ")
+                    .append("0 as withdrawalAmount ")
 
                     .append("FROM m_group gp ")
                     .append("LEFT JOIN m_office of ON of.id = gp.office_id AND of.hierarchy like :officeHierarchy ")
@@ -478,10 +482,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("LEFT JOIN m_staff sf ON sf.id = gp.staff_id ")
                     .append("JOIN m_group_client gc ON gc.group_id = gp.id ")
                     .append("JOIN m_client cl ON cl.id = gc.client_id ")
-                    .append("JOIN m_savings_account sa ON sa.client_id=cl.id and sa.status_enum=300 ")
+                    .append("JOIN m_savings_account sa ON sa.client_id=cl.id and sa.status_enum=300 and (sa.deposit_type_enum=100 or sa.deposit_type_enum=300) ")
                     .append("JOIN m_savings_product sp ON sa.product_id=sp.id ")
-                    .append("JOIN m_deposit_account_recurring_detail dard ON sa.id = dard.savings_account_id AND dard.is_mandatory = true AND dard.is_calendar_inherited = true ")
-                    .append("JOIN m_mandatory_savings_schedule mss ON mss.savings_account_id=sa.id AND mss.duedate <= :dueDate ")
+                    .append("LEFT JOIN m_deposit_account_recurring_detail dard ON sa.id = dard.savings_account_id AND dard.is_mandatory = true ")
+                    .append("LEFT JOIN m_mandatory_savings_schedule mss ON mss.savings_account_id=sa.id AND mss.duedate <= :dueDate ")
                     .append("LEFT JOIN m_currency rc on rc.`code` = sa.currency_code ");
 
             if (isCenterCollection) {
@@ -492,7 +496,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
             sql.append("and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
                     .append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
-                    .append("GROUP BY gp.id ,cl.id , sa.id ORDER BY gp.id , cl.id , sa.id ");
+                    .append("GROUP BY gp.id ,cl.id , sa.id ORDER BY gp.id ,cl.id , sa.id  ");
 
             return sql.toString();
         }
@@ -613,9 +617,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final Long savingsId = rs.getLong("savingsId");
             final String accountId = rs.getString("accountId");
             final Integer accountStatusId = JdbcSupport.getInteger(rs, "accountStatusId");
+            final Integer accountTypeId = JdbcSupport.getInteger(rs, "accountTypeId");
+            final Integer productDepositType = JdbcSupport.getInteger(rs,"productDepositType");
             final String productName = rs.getString("productShortName");
             final Long productId = rs.getLong("productId");
             final BigDecimal dueAmount = rs.getBigDecimal("dueAmount");
+            final BigDecimal withdrawalAmount = rs.getBigDecimal("withdrawalAmount");
 
             final String currencyCode = rs.getString("currencyCode");
             final String currencyName = rs.getString("currencyName");
@@ -627,7 +634,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
 
-            return SavingsDueData.instance(savingsId, accountId, accountStatusId, productName, productId, currency, dueAmount);
+            return SavingsDueData.instance(savingsId, accountId, accountStatusId, accountTypeId, productDepositType, productName, productId, currency, dueAmount, withdrawalAmount);
         }
     }
 
