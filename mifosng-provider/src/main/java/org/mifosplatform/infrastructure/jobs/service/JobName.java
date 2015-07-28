@@ -29,7 +29,10 @@ public enum JobName {
     LOAN_FIRST_OVERDUE_REPAYMENT_REMINDER_SMS("Loan First Overdue Repayment Reminder"),
     LOAN_SECOND_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Second Overdue Repayment Reminder"), 
     LOAN_THIRD_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Third Overdue Repayment Reminder"),
-    LOAN_FOURTH_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Fourth Overdue Repayment Reminder");
+    LOAN_FOURTH_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Fourth Overdue Repayment Reminder"),
+    DEFAULT_WARNING_SMS_TO_CLIENT("Default Wring Sms To Client"),
+    DEFAULT_WARNING_SMS_TO_GURANTOR("Default Warning Sms To gurantor"),
+    DORMANCY_WARNING_SMS_TO_CLIENT("Dormancy Warning Sms To Clients");
     private final String name;
 
     private JobName(final String name) {

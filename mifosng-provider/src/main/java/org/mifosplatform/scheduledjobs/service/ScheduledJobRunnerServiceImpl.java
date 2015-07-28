@@ -8,6 +8,9 @@ package org.mifosplatform.scheduledjobs.service;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -476,7 +479,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
 	@Override
 	@CronTarget(jobName = JobName.LOAN_REPAYMENT_SMS_REMINDER_TO_CLIENT)
-	public void LoanRepaymentSmsReminder() {
+	public void loanRepaymentSmsReminder() {
 		String payLoadUrl = null;
 		String apikey = hookRepository.retriveApiKey();
 		final String tenantIdentifier = ThreadLocalContextUtil.getTenant()
@@ -501,8 +504,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 		httpPost.addHeader("X-Mifos-API-Key", apikey);
 		StringEntity entity;
 		try {
+			Date now = new Date();			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");	
+			String date=df.format(now);
 			JSONObject jsonObj = new JSONObject(
-					"{\"reportName\":\"Loan Repayment Reminders\",\"date\":\"2015-06-26\"}");
+					"{\"reportName\":\"Loan Repayment Reminders\",\"date\":\""+date+"\"}");
 			entity = new StringEntity(jsonObj.toString());
 			httpPost.setEntity(entity);
 			httpClient.execute(httpPost);
@@ -518,12 +524,15 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 		} catch (JSONException e) {
 			logger.info(e.getMessage());
 			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	@CronTarget(jobName = JobName.LOAN_FIRST_OVERDUE_REPAYMENT_REMINDER_SMS)
-	public void LoanFirstOverdueRepaymentReminder() {
+	public void loanFirstOverdueRepaymentReminder() {
 		String payLoadUrl = null;
 		String apikey = hookRepository.retriveApiKey();
 		final String tenantIdentifier = ThreadLocalContextUtil.getTenant()
@@ -548,8 +557,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 		httpPost.addHeader("X-Mifos-API-Key", apikey);
 		StringEntity entity;
 		try {
+			Date now = new Date();			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");	
+			String date=df.format(now);
 			JSONObject jsonObj = new JSONObject(
-					"{\"reportName\":\"Loan First Overdue Repayment Reminder\",\"date\":\"2015-07-03\"}");
+					"{\"reportName\":\"Loan First Overdue Repayment Reminder\",\"date\":\""+date+"\"}");
 			entity = new StringEntity(jsonObj.toString());
 			httpPost.setEntity(entity);
 			httpClient.execute(httpPost);
@@ -570,7 +582,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
 	@Override
 	@CronTarget(jobName = JobName.LOAN_SECOND_OVERDUE_REPAYMENT_REMINDER_SMS)
-	public void LoanSecondOverdueRepaymentReminder() {
+	public void loanSecondOverdueRepaymentReminder() {
 		String payLoadUrl = null;
 		String apikey = hookRepository.retriveApiKey();
 		final String tenantIdentifier = ThreadLocalContextUtil.getTenant()
@@ -595,8 +607,12 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 		httpPost.addHeader("X-Mifos-API-Key", apikey);
 		StringEntity entity;
 		try {
+			Date now = new Date();			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");	
+			String date=df.format(now);
+			            
 			JSONObject jsonObj = new JSONObject(
-					"{\"reportName\":\"Loan Second Overdue Repayment Reminder\",\"date\":\"2015-08-03\"}");
+					"{\"reportName\":\"Loan Second Overdue Repayment Reminder\",\"date\":\""+date+"\"}");
 			entity = new StringEntity(jsonObj.toString());
 			httpPost.setEntity(entity);
 			httpClient.execute(httpPost);
@@ -617,7 +633,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
 	@Override
 	@CronTarget(jobName = JobName.LOAN_THIRD_OVERDUE_REPAYMENT_REMINDER_SMS)
-	public void LoanThirdOverdueRepaymentReminder() {
+	public void loanThirdOverdueRepaymentReminder() {
 		String payLoadUrl = null;
 		String apikey = hookRepository.retriveApiKey();
 		final String tenantIdentifier = ThreadLocalContextUtil.getTenant()
@@ -642,8 +658,10 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 		httpPost.addHeader("X-Mifos-API-Key", apikey);
 		StringEntity entity;
 		try {
-			JSONObject jsonObj = new JSONObject(
-					"{\"reportName\":\"Loan Third Overdue Repayment Reminder\",\"date\":\"2015-09-03\"}");
+			Date now = new Date();			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");	
+			String date=df.format(now);
+			JSONObject jsonObj = new JSONObject("{\"reportName\":\"Loan Third Overdue Repayment Reminder\",\"date\":\""+date+"\"}");
 			entity = new StringEntity(jsonObj.toString());
 			httpPost.setEntity(entity);
 			httpClient.execute(httpPost);
@@ -664,7 +682,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
 	@Override
 	@CronTarget(jobName = JobName.LOAN_FOURTH_OVERDUE_REPAYMENT_REMINDER_SMS)
-	public void LoanFourthOverdueRepaymentReminder() {
+	public void loanFourthOverdueRepaymentReminder() {
 		String payLoadUrl = null;
 		String apikey = hookRepository.retriveApiKey();
 		final String tenantIdentifier = ThreadLocalContextUtil.getTenant()
@@ -689,8 +707,161 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 		httpPost.addHeader("X-Mifos-API-Key", apikey);
 		StringEntity entity;
 		try {
+			Date now = new Date();			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");	
+			String date=df.format(now);
 			JSONObject jsonObj = new JSONObject(
-					"{\"reportName\":\"Loan Fourth Overdue Repayment Reminder\",\"date\":\"2015-10-03\"}");
+					"{\"reportName\":\"Loan Fourth Overdue Repayment Reminder\",\"date\":\""+date+"\"}");
+			entity = new StringEntity(jsonObj.toString());
+			httpPost.setEntity(entity);
+			httpClient.execute(httpPost);
+		} catch (UnsupportedEncodingException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (JSONException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	@CronTarget(jobName = JobName.DEFAULT_WARNING_SMS_TO_CLIENT)
+	public void defaultWarningToClients() {
+		String payLoadUrl = null;
+		String apikey = hookRepository.retriveApiKey();
+		final String tenantIdentifier = ThreadLocalContextUtil.getTenant()
+				.getTenantIdentifier();
+		ArrayList<HookConfiguration> hookDetail = new ArrayList<HookConfiguration>();
+		hookDetail = hookConfigurationRepository.retriveDetail();
+		HookConfiguration hookConfiguration = new HookConfiguration();
+		for (int i = 0; i < hookDetail.size(); i++) {
+			hookConfiguration = hookDetail.get(i);
+			if (hookConfiguration.getFieldName()
+					.equalsIgnoreCase("Payload URL")) {
+				payLoadUrl = hookConfiguration.getFieldValue();
+				break;
+			}
+		}
+		HttpClient httpClient = new DefaultHttpClient();
+		HttpPost httpPost = new HttpPost(payLoadUrl);
+		httpPost.addHeader("X-Mifos-Action", "EXECUTEJOB");
+		httpPost.addHeader("X-Mifos-Entity", "SCHEDULER");
+		httpPost.addHeader("X-Mifos-Platform-TenantId", tenantIdentifier);
+		httpPost.addHeader("Content-Type", "application/json");
+		httpPost.addHeader("X-Mifos-API-Key", apikey);
+		StringEntity entity;
+		try {
+			Date now = new Date();			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");	
+			String date=df.format(now);
+			JSONObject jsonObj = new JSONObject(
+					"{\"reportName\":\"DefaultWarning - Clients\",\"date\":\""+date+"\"}");
+			entity = new StringEntity(jsonObj.toString());
+			httpPost.setEntity(entity);
+			httpClient.execute(httpPost);
+		} catch (UnsupportedEncodingException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (JSONException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	@CronTarget(jobName = JobName.DEFAULT_WARNING_SMS_TO_GURANTOR)
+	public void defaultWarningToGuarantors() {
+		String payLoadUrl = null;
+		String apikey = hookRepository.retriveApiKey();
+		final String tenantIdentifier = ThreadLocalContextUtil.getTenant()
+				.getTenantIdentifier();
+		ArrayList<HookConfiguration> hookDetail = new ArrayList<HookConfiguration>();
+		hookDetail = hookConfigurationRepository.retriveDetail();
+		HookConfiguration hookConfiguration = new HookConfiguration();
+		for (int i = 0; i < hookDetail.size(); i++) {
+			hookConfiguration = hookDetail.get(i);
+			if (hookConfiguration.getFieldName()
+					.equalsIgnoreCase("Payload URL")) {
+				payLoadUrl = hookConfiguration.getFieldValue();
+				break;
+			}
+		}
+		HttpClient httpClient = new DefaultHttpClient();
+		HttpPost httpPost = new HttpPost(payLoadUrl);
+		httpPost.addHeader("X-Mifos-Action", "EXECUTEJOB");
+		httpPost.addHeader("X-Mifos-Entity", "SCHEDULER");
+		httpPost.addHeader("X-Mifos-Platform-TenantId", tenantIdentifier);
+		httpPost.addHeader("Content-Type", "application/json");
+		httpPost.addHeader("X-Mifos-API-Key", apikey);
+		StringEntity entity;
+		try {
+			Date now = new Date();			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");	
+			String date=df.format(now);
+			JSONObject jsonObj = new JSONObject(
+					"{\"reportName\":\"DefaultWarning -  guarantors\",\"date\":\""+date+"\"}");
+			entity = new StringEntity(jsonObj.toString());
+			httpPost.setEntity(entity);
+			httpClient.execute(httpPost);
+		} catch (UnsupportedEncodingException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		} catch (JSONException e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	@CronTarget(jobName = JobName.DORMANCY_WARNING_SMS_TO_CLIENT)
+	public void dormancyWarningToClients() {
+		String payLoadUrl = null;
+		String apikey = hookRepository.retriveApiKey();
+		final String tenantIdentifier = ThreadLocalContextUtil.getTenant()
+				.getTenantIdentifier();
+		ArrayList<HookConfiguration> hookDetail = new ArrayList<HookConfiguration>();
+		hookDetail = hookConfigurationRepository.retriveDetail();
+		HookConfiguration hookConfiguration = new HookConfiguration();
+		for (int i = 0; i < hookDetail.size(); i++) {
+			hookConfiguration = hookDetail.get(i);
+			if (hookConfiguration.getFieldName()
+					.equalsIgnoreCase("Payload URL")) {
+				payLoadUrl = hookConfiguration.getFieldValue();
+				break;
+			}
+		}
+		HttpClient httpClient = new DefaultHttpClient();
+		HttpPost httpPost = new HttpPost(payLoadUrl);
+		httpPost.addHeader("X-Mifos-Action", "EXECUTEJOB");
+		httpPost.addHeader("X-Mifos-Entity", "SCHEDULER");
+		httpPost.addHeader("X-Mifos-Platform-TenantId", tenantIdentifier);
+		httpPost.addHeader("Content-Type", "application/json");
+		httpPost.addHeader("X-Mifos-API-Key", apikey);
+		StringEntity entity;
+		try {
+			Date now = new Date();			
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");	
+			String date=df.format(now);
+			JSONObject jsonObj = new JSONObject(
+					"{\"reportName\":\"DormancyWarning - Clients\",\"date\":\""+date+"\"}");
 			entity = new StringEntity(jsonObj.toString());
 			httpPost.setEntity(entity);
 			httpClient.execute(httpPost);
