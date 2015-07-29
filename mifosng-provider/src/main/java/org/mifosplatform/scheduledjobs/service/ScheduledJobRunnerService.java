@@ -22,4 +22,24 @@ public interface ScheduledJobRunnerService {
     void updateMaturityDetailsOfDepositAccounts();
 
     void generateRDSchedule();
+
+	void loanRepaymentSmsReminder();
+	
+	void loanFirstOverdueRepaymentReminder();
+	
+	void loanSecondOverdueRepaymentReminder();
+	
+	void loanThirdOverdueRepaymentReminder();
+	
+	void loanFourthOverdueRepaymentReminder();
+	
+	void defaultWarningToClients(); 
+	
+	void defaultWarningToGuarantors();
+	
+	void dormancyWarningToClients();
+	
+    
+    
+    
 }

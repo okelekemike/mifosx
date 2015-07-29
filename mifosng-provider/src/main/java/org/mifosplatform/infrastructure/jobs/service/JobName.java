@@ -24,8 +24,15 @@ public enum JobName {
     TRANSFER_INTEREST_TO_SAVINGS("Transfer Interest To Savings"),
     ADD_PERIODIC_ACCRUAL_ENTRIES("Add Periodic Accrual Transactions"),
     RECALCULATE_INTEREST_FOR_LOAN("Recalculate Interest For Loans"),
-    GENERATE_RD_SCEHDULE("Generate Mandatory Savings Schedule");
-
+    GENERATE_RD_SCEHDULE("Generate Mandatory Savings Schedule"),
+    LOAN_REPAYMENT_SMS_REMINDER_TO_CLIENT("Loan Repayment Sms Reminder"),
+    LOAN_FIRST_OVERDUE_REPAYMENT_REMINDER_SMS("Loan First Overdue Repayment Reminder"),
+    LOAN_SECOND_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Second Overdue Repayment Reminder"), 
+    LOAN_THIRD_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Third Overdue Repayment Reminder"),
+    LOAN_FOURTH_OVERDUE_REPAYMENT_REMINDER_SMS("Loan Fourth Overdue Repayment Reminder"),
+    DEFAULT_WARNING_SMS_TO_CLIENT("Default Wring Sms To Client"),
+    DEFAULT_WARNING_SMS_TO_GURANTOR("Default Warning Sms To gurantor"),
+    DORMANCY_WARNING_SMS_TO_CLIENT("Dormancy Warning Sms To Clients");
     private final String name;
 
     private JobName(final String name) {
