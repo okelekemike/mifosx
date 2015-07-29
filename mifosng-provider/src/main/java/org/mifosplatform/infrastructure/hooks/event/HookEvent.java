@@ -27,6 +27,19 @@ public class HookEvent extends ApplicationEvent {
 		this.appUser = appUser;
 		this.authToken = authToken;
 	}
+	
+public HookEvent(final HookEventSource source, final String payload,
+			final String tenantIdentifier)
+{
+	
+	super(source);
+	this.payload = payload;
+	this.tenantIdentifier = tenantIdentifier;
+	this.appUser = null;
+	this.authToken = null;
+	
+}
+			
 
 	public String getPayload() {
 		return this.payload;

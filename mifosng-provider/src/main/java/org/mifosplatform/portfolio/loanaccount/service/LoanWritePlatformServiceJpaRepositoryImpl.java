@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,10 +20,18 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.commands.service.SynchronousCommandProcessingService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -32,7 +42,11 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.hooks.event.HookEvent;
+import org.mifosplatform.infrastructure.hooks.event.HookEventSource;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -158,10 +172,12 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -205,6 +221,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final GuarantorDomainService guarantorDomainService;
+    private final ApplicationContext applicationContext;
+    private final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer;
+   
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -230,7 +249,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanApplicationCommandFromApiJsonHelper loanApplicationCommandFromApiJsonHelper,
             final AccountAssociationsRepository accountAssociationRepository,
             final AccountTransferDetailRepository accountTransferDetailRepository,
-            final BusinessEventNotifierService businessEventNotifierService, final GuarantorDomainService guarantorDomainService) {
+            final BusinessEventNotifierService businessEventNotifierService, final GuarantorDomainService guarantorDomainService,
+            final ApplicationContext applicationContext,
+            final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer)
+ {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -265,6 +287,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.accountTransferDetailRepository = accountTransferDetailRepository;
         this.businessEventNotifierService = businessEventNotifierService;
         this.guarantorDomainService = guarantorDomainService;
+        this.applicationContext = applicationContext;
+        this.toApiResultJsonSerializer = toApiResultJsonSerializer;
+       
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -2890,6 +2915,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_INTEREST_RECALCULATION,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
     }
+    			
+	
+	
+
 
     @Override
     public CommandProcessingResult recoverFromGuarantor(final Long loanId) {
@@ -2997,5 +3026,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         map.put(entityEvent, entity);
         return map;
     }
+    
 
 }

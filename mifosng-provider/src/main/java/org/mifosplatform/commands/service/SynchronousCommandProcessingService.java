@@ -27,9 +27,9 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 @Service
 public class SynchronousCommandProcessingService implements CommandProcessingService {
 
@@ -196,7 +196,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         return rollbackTransaction;
     }
 
-    private void publishEvent(final String entityName, final String actionName, final CommandProcessingResult result) {
+    public void publishEvent(final String entityName, final String actionName, final CommandProcessingResult result) {
 
         final String authToken = ThreadLocalContextUtil.getAuthToken();
         final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
