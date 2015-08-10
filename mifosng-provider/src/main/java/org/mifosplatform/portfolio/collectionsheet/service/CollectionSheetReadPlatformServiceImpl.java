@@ -213,7 +213,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("ln.product_id As productId, ")
                     .append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ")
                     .append("if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, ")
-                    .append("sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.principal_completed_derived, 0.0), 0.0)) As principalDue, ")
+                    .append("if(sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0)) > ln.principal_outstanding_derived ,ln.principal_outstanding_derived, sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0)))  As principalDue, ")
                     .append("ln.principal_repaid_derived As principalPaid, ")
                     .append("sum(ifnull(if(ln.loan_status_id = 300, ls.interest_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.interest_completed_derived, 0.0), 0.0)) As interestDue, ")
                     .append("ln.interest_repaid_derived As interestPaid, ")
