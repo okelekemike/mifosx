@@ -42,6 +42,10 @@ INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`) SELECT mc.id
 INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`) SELECT mc.id, 'Single', 2 FROM m_code mc WHERE mc.`code_name` = "Marital";
 INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`) SELECT mc.id, 'Other', 3 FROM m_code mc WHERE mc.`code_name` = "Marital";
 
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`) SELECT mc.id, 'Male', 1 FROM m_code mc WHERE mc.`code_name` = "Gender";
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`) SELECT mc.id, 'Female', 2 FROM m_code mc WHERE mc.`code_name` = "Gender";
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`) SELECT mc.id, 'Other', 3 FROM m_code mc WHERE mc.`code_name` = "Gender";
+
 ALTER TABLE `m_client`
 ADD CONSTRAINT `FK_m_client_next_of_kin_relationship_m_code_value` FOREIGN KEY (`next_of_kin_relationship_cv_id`) REFERENCES `m_code_value` (`id`),
 ADD CONSTRAINT `FK_m_client_marital_m_code_value` FOREIGN KEY (`marital_cv_id`) REFERENCES `m_code_value` (`id`);
